@@ -17,7 +17,14 @@ Telegram bot for capturing tasks with minimal friction. Send text or voice — t
 ## Setup
 
 ```bash
+pipx install openai-whisper
 pipx install -e .
+```
+
+Pre-download the Whisper model (avoids a 1.5 GB download on first voice message):
+
+```bash
+python -c "import whisper; whisper.load_model('large-v3-turbo')"
 ```
 
 Create a `shabbot.env` file:
