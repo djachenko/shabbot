@@ -22,7 +22,9 @@ parser = DumbParser()
 
 
 async def transcribe_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str | None:
+    assert update.message is not None
     voice = update.message.voice
+    assert voice is not None
     file = await context.bot.get_file(voice.file_id)
 
     with TemporaryDirectory() as tmp_dir:
@@ -59,11 +61,15 @@ async def transcribe_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    assert update.message is not None
+    assert update.effective_user is not None
     log.info("text from %s: %r", update.effective_user.username, update.message.text)
-    await _process(update, update.message.text)
+    await _process(update, update.message.text or "")
 
 
 async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    assert update.message is not None
+    assert update.effective_user is not None
     log.info("voice from %s", update.effective_user.username)
     status = await update.message.reply_text("🎙 Транскрибирую")
 
@@ -101,6 +107,7 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 
 async def _process(update: Update, text: str) -> None:
+    assert update.message is not None
     task = parser.parse(text)
 
     log.info("creating todoist task: %r", task.summary)
