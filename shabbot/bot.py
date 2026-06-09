@@ -6,6 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from telegram import Update
+from telegram.error import TimedOut
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 
 from shabbot.parser.base import DumbParser
@@ -28,7 +29,15 @@ async def transcribe_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         tmp = Path(tmp_dir)
 
         ogg_path = tmp / "voice.ogg"
-        await file.download_to_drive(ogg_path)
+        for attempt in range(3):
+            try:
+                await file.download_to_drive(ogg_path)
+                break
+            except TimedOut:
+                if attempt == 2:
+                    raise
+                log.warning("download timed out, retrying (%d/3)", attempt + 1)
+                await asyncio.sleep(2)
 
         result = subprocess.run(
             [WHISPER_BIN, ogg_path, "--model", WHISPER_MODEL, "--language", "ru", "--output_format", "txt", "--output_dir", tmp],
@@ -71,6 +80,11 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     try:
         text = await transcribe_voice(update, context)
+    except TimedOut:
+        pulse_task.cancel()
+        log.error("timed out downloading voice file")
+        await status.edit_text("❌ Таймаут при загрузке файла, попробуй ещё раз")
+        return
     finally:
         pulse_task.cancel()
 
