@@ -15,6 +15,9 @@ Todoist ↔ Google Calendar уже синхронизированы. Через 
 ### DumbParser сейчас, BaseParser interface для будущего
 Текст as-is → summary, date = today. Когда появится Ollama — создаётся OllamaParser(BaseParser), в bot.py меняется одна строка.
 
+### PSR: версия читается из git тегов, не из pyproject.toml
+`version_toml` говорит PSR только **куда писать** результат. Текущую версию PSR читает из последнего git тега. Без тега поведение непредсказуемо (может выдать 1.0.0 вместо 0.1.0). Чтобы PSR знал откуда считать — нужен начальный тег `v0.0.0` на первом коммите. Порядок работы PSR: читает последний тег → считает bump по коммитам → пишет новую версию в pyproject.toml → коммит + тег → push → build → publish.
+
 ### Будущее: dotfiles-репо + централизованная Claude memory
 Идея: `~/dotfiles/` с симлинками на `~/.claude/`, `.gitconfig`, `.zshrc` и т.д. Claude memory хранится в `~/dotfiles/claude/memory/<project>/`, в каждом проекте симлинк `memory → ~/dotfiles/claude/memory/<project>`. Не делать пока не закончены текущие приоритеты.
 
