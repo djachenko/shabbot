@@ -22,4 +22,4 @@ build-backend = "hatchling.build"
 version_toml = ["pyproject.toml:project.version"]
 branch = "master"
 major_on_zero = false
-build_command = "pip install build hatchling && python -m build"
+build_command = "pip install build && python -m build"
