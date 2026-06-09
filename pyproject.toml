@@ -21,3 +21,4 @@ build-backend = "hatchling.build"
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
 branch = "master"
+major_on_zero = false
