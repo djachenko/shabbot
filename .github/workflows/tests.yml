@@ -25,4 +25,4 @@ jobs:
         run: ruff check
 
       - name: Type check
-        run: mypy src/
+        run: mypy shabbot/
