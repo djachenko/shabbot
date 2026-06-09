@@ -1,7 +1,7 @@
 [project]
 name = "shabbot"
 version = "0.1.0"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "python-telegram-bot>=21.0",
     "todoist-api-python>=2.0",
@@ -9,6 +9,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = ["pytest", "ruff", "mypy"]
+release = ["python-semantic-release", "build"]
 
 [project.scripts]
 shabbot = "shabbot.bot:main"
@@ -16,3 +17,7 @@ shabbot = "shabbot.bot:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+branch = "master"
