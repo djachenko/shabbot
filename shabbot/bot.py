@@ -31,7 +31,7 @@ async def transcribe_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         await file.download_to_drive(ogg_path)
 
         result = subprocess.run(
-            [WHISPER_BIN, ogg_path, "--model", WHISPER_MODEL, "--output_format", "txt", "--output_dir", tmp],
+            [WHISPER_BIN, ogg_path, "--model", WHISPER_MODEL, "--language", "ru", "--output_format", "txt", "--output_dir", tmp],
             capture_output=True,
             text=True,
         )
