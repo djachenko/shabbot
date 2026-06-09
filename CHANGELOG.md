@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v0.1.1 (2026-06-09)
+
+### Bug Fixes
+
+- Detect release by tag diff instead of PSR --print
+  ([`0ec03d1`](https://github.com/djachenko/shabbot/commit/0ec03d1e431e5aca99288421e802ac713c7a0bb6))
+
+### Continuous Integration
+
+- Add [skip ci] to PSR version bump commit message
+  ([`b063988`](https://github.com/djachenko/shabbot/commit/b0639882238acf1831b6bf9ac415b10d3b7145a3))
+
+- Skip release workflow on PSR version bump commit
+  ([`03020df`](https://github.com/djachenko/shabbot/commit/03020dfa4ea4cc080c007ae0bc977a175df84263))
+
+- Trigger CI
+  ([`b26034c`](https://github.com/djachenko/shabbot/commit/b26034c5df6595e0f294383cd0ec44fad9a82140))
+
+
 ## v0.1.0 (2026-06-09)
 
 ### Bug Fixes
