@@ -1,6 +1,10 @@
-# feat-initial-setup — Бот запущен, proof of concept работает
+# feat-initial-setup — Бот shabbot готов к использованию, незакоммиченные правки в bot.py
 
-<!-- Telegram-бот capturebot установлен через pipx, текстовые и голосовые сообщения создают задачи в Todoist. -->
+<!-- Telegram-бот shabbot установлен через pipx, текстовые и голосовые сообщения создают задачи в Todoist. -->
+
+### 2026-06-09 — Переименование, retry на таймаут, язык whisper, git history
+
+Проект переименован capturebot → shabbot. В `bot.py` добавлены: retry при `TimedOut` во время загрузки голосового файла (3 попытки, 2s задержка, потом user-facing error), флаг `--language ru` для whisper (по умолчанию определял украинский), pathlib вместо строк для путей, восстановлен `~filters.COMMAND` фильтр. В `client.py` рефактор: `description or None` заменён на `parts: list[str]`. Создан git-репо с semantic commits, README, CLAUDE.md с конвенциями. **Остаток: `shabbot/bot.py` ещё не закоммичен** (retry + language + pathlib).
 
 ### 2026-06-03 — Первый запуск capturebot, отладка, проверка голоса
 
