@@ -7,6 +7,9 @@ dependencies = [
     "todoist-api-python>=2.0",
 ]
 
+[project.optional-dependencies]
+test = ["pytest", "ruff", "mypy"]
+
 [project.scripts]
 shabbot = "shabbot.bot:main"
 
