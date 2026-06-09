@@ -118,6 +118,10 @@ async def _process(update: Update, text: str) -> None:
 
 
 def main() -> None:
+    import argparse
+
+    argparse.ArgumentParser(description="Telegram bot for capturing tasks to Todoist.").parse_known_args()
+
     app = ApplicationBuilder().token(os.environ["SHABBOT_TOKEN"]).build()
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_handler(MessageHandler(filters.VOICE, handle_voice))
