@@ -1,13 +1,13 @@
-import os
-
 from todoist_api_python.api import TodoistAPI
 from todoist_api_python.models import Task as TodoistTask
 
+from shabbot.config import load_config
 from shabbot.task import Task
 
 
 def create_task(task: Task) -> TodoistTask:
-    api = TodoistAPI(os.environ["TODOIST_TOKEN"])
+    config = load_config()
+    api = TodoistAPI(config["TODOIST_TOKEN"])
 
     parts: list[str] = []
 

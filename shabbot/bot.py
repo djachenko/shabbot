@@ -9,6 +9,7 @@ from telegram import Update
 from telegram.error import TimedOut
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 
+from shabbot.config import load_config
 from shabbot.parser.base import DumbParser
 from shabbot.todoist.client import create_task
 
@@ -122,7 +123,9 @@ def main() -> None:
 
     argparse.ArgumentParser(description="Telegram bot for capturing tasks to Todoist.").parse_known_args()
 
-    app = ApplicationBuilder().token(os.environ["SHABBOT_TOKEN"]).build()
+    config = load_config()
+
+    app = ApplicationBuilder().token(config["SHABBOT_TOKEN"]).build()
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_handler(MessageHandler(filters.VOICE, handle_voice))
     app.run_polling()
