@@ -5,6 +5,7 @@ requires-python = ">=3.10"
 dependencies = [
     "python-telegram-bot>=21.0",
     "todoist-api-python>=2.0",
+    "python-dotenv>=1.0",
 ]
 
 [project.optional-dependencies]
