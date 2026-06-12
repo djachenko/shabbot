@@ -15,8 +15,8 @@ from shabbot.todoist.client import create_task
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-WHISPER_BIN = Path(os.environ.get("WHISPER_BIN", "~/.local/bin/whisper")).expanduser()
-WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "large")
+WHISPER_MODEL = "large-v3-turbo"
+WHISPER_BIN = "whisper"
 
 parser = DumbParser()
 
