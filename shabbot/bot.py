@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import os
 import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -9,14 +8,15 @@ from telegram import Update
 from telegram.error import TimedOut
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 
+from shabbot.config import load_config
 from shabbot.parser.base import DumbParser
 from shabbot.todoist.client import create_task
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-WHISPER_BIN = Path(os.environ.get("WHISPER_BIN", "~/.local/bin/whisper")).expanduser()
-WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "large")
+WHISPER_MODEL = "large-v3-turbo"
+WHISPER_BIN = "whisper"
 
 parser = DumbParser()
 
@@ -122,7 +122,9 @@ def main() -> None:
 
     argparse.ArgumentParser(description="Telegram bot for capturing tasks to Todoist.").parse_known_args()
 
-    app = ApplicationBuilder().token(os.environ["SHABBOT_TOKEN"]).build()
+    config = load_config()
+
+    app = ApplicationBuilder().token(config["SHABBOT_TOKEN"]).build()
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_handler(MessageHandler(filters.VOICE, handle_voice))
     app.run_polling()
