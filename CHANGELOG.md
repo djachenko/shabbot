@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v0.2.0 (2026-06-12)
+
+### Bug Fixes
+
+- Remove unused os import
+  ([`eee7c4e`](https://github.com/djachenko/shabbot/commit/eee7c4e0911b73ba0a558da9bd07f6000b75d734))
+
+### Features
+
+- Add config module with .env loading and interactive setup
+  ([`2fdcb2f`](https://github.com/djachenko/shabbot/commit/2fdcb2fc18e574e34ae1955d5fa30dd7776bd945))
+
+### Refactoring
+
+- Hardcode whisper model and bin instead of reading from env
+  ([`06538e7`](https://github.com/djachenko/shabbot/commit/06538e764448116d3ff8a24707b794602ab16cdc))
+
+- Replace direct env access with config module
+  ([`aef1595`](https://github.com/djachenko/shabbot/commit/aef159515fad5c8d84df598a4372d87b87516535))
+
+
 ## v0.1.1 (2026-06-09)
 
 ### Bug Fixes
