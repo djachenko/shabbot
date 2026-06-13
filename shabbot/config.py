@@ -1,66 +1,72 @@
+import getpass
 import os
+from dataclasses import dataclass
 from pathlib import Path
 
 from dotenv import load_dotenv
 
+CONFIG_DIR = Path.home() / ".config" / "shabbot"
+CONFIG_FILE = CONFIG_DIR / "env"
 
-def _prompt_for_token(name: str, description: str) -> str:
-    print(f"\n{description}")
-    print(f"Get it from: {_get_token_source(name)}")
-    value = input(f"Enter {name}: ").strip()
+DEFAULT_WHISPER_MODEL = "large-v3-turbo"
+
+
+@dataclass(frozen=True)
+class Config:
+    shabbot_token: str
+    todoist_token: str
+    whisper_model: str
+
+    def save(self) -> None:
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+
+        with open(CONFIG_FILE, "w") as f:
+            f.write(f"SHABBOT_TOKEN={self.shabbot_token}\n")
+            f.write(f"TODOIST_TOKEN={self.todoist_token}\n")
+            f.write(f"WHISPER_MODEL={self.whisper_model}\n")
+
+        CONFIG_FILE.chmod(0o600)
+
+
+def _prompt_secret(name: str, hint: str) -> str:
+    print(f"\n{name}: {hint}")
+
+    value = getpass.getpass(f"{name}: ").strip()
+
     if not value:
         raise ValueError(f"{name} cannot be empty")
+
     return value
 
 
-def _get_token_source(name: str) -> str:
-    sources = {
-        "SHABBOT_TOKEN": "https://t.me/BotFather (create/edit your bot)",
-        "TODOIST_TOKEN": "https://todoist.com/app/settings/integrations/developer",
-    }
-    return sources.get(name, "your service settings")
+def _prompt_model() -> str:
+    value = input(f"\nWhisper model [{DEFAULT_WHISPER_MODEL}]: ").strip()
+
+    return value or DEFAULT_WHISPER_MODEL
 
 
-def load_config() -> dict[str, str]:
-    """Load environment config from .env file or prompt user."""
-    env_file = Path("shabbot.env")
+def load_config() -> Config:
+    if CONFIG_FILE.exists():
+        load_dotenv(CONFIG_FILE)
 
-    # Try loading from .env file if it exists
-    if env_file.exists():
-        load_dotenv(env_file)
+    shabbot_token = os.environ.get("SHABBOT_TOKEN") or _prompt_secret(
+        "SHABBOT_TOKEN",
+        "https://t.me/BotFather",
+    )
 
-    # Check if required tokens are available
-    shabbot_token = os.environ.get("SHABBOT_TOKEN")
-    todoist_token = os.environ.get("TODOIST_TOKEN")
+    todoist_token = os.environ.get("TODOIST_TOKEN") or _prompt_secret(
+        "TODOIST_TOKEN",
+        "https://todoist.com/app/settings/integrations/developer",
+    )
 
-    # Only prompt and save if .env doesn't exist
-    env_file_existed = env_file.exists()
+    whisper_model = os.environ.get("WHISPER_MODEL") or _prompt_model()
 
-    # Prompt for missing tokens
-    if not shabbot_token:
-        shabbot_token = _prompt_for_token(
-            "SHABBOT_TOKEN",
-            "Telegram bot token is required to run shabbot.",
-        )
-        os.environ["SHABBOT_TOKEN"] = shabbot_token
+    config = Config(
+        shabbot_token=shabbot_token,
+        todoist_token=todoist_token,
+        whisper_model=whisper_model,
+    )
 
-    if not todoist_token:
-        todoist_token = _prompt_for_token(
-            "TODOIST_TOKEN",
-            "Todoist API token is required to create tasks.",
-        )
-        os.environ["TODOIST_TOKEN"] = todoist_token
+    config.save()
 
-    # Offer to save only if .env didn't exist before
-    if not env_file_existed and shabbot_token and todoist_token:
-        save = input("\nSave configuration to shabbot.env? (y/n): ").strip().lower()
-        if save == "y":
-            with open(env_file, "w") as f:
-                f.write(f"export SHABBOT_TOKEN={shabbot_token}\n")
-                f.write(f"export TODOIST_TOKEN={todoist_token}\n")
-            print(f"✓ Saved to {env_file}")
-
-    return {
-        "SHABBOT_TOKEN": os.environ["SHABBOT_TOKEN"],
-        "TODOIST_TOKEN": os.environ["TODOIST_TOKEN"],
-    }
+    return config

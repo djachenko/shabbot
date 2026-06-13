@@ -7,14 +7,17 @@ from shabbot.task import Task
 
 def create_task(task: Task) -> TodoistTask:
     config = load_config()
-    api = TodoistAPI(config["TODOIST_TOKEN"])
+
+    api = TodoistAPI(config.todoist_token)
 
     parts: list[str] = []
 
     if task.description:
         parts.append(task.description)
+
     if task.location:
         parts.append(f"📍 {task.location}")
+
     if task.raw_text and task.raw_text != task.summary:
         parts.append(f"🎙 {task.raw_text}")
 
