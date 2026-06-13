@@ -2,6 +2,32 @@
 
 <!-- version list -->
 
+## v0.3.0 (2026-06-13)
+
+### Bug Fixes
+
+- Use config.todoist_token instead of dict access
+  ([`ddf2d3a`](https://github.com/djachenko/shabbot/commit/ddf2d3aa607cf1dc310d0a4d57c9777fa1b03264))
+
+### Chores
+
+- Update memory index and backlog
+  ([`7984ab3`](https://github.com/djachenko/shabbot/commit/7984ab3eabaaef692024ae3704c8de45ec09f642))
+
+### Features
+
+- Install wizard script
+  ([`e158c54`](https://github.com/djachenko/shabbot/commit/e158c545b1897de69e7e5b7d5e5b4a765f2be551))
+
+### Refactoring
+
+- Pipeline via _make_handler and _catcher, invert handler dependencies
+  ([`0713e56`](https://github.com/djachenko/shabbot/commit/0713e561842f316671affc04aec998f7a2fb57c0))
+
+- Replace config dict with dataclass, move to XDG path
+  ([`15b1954`](https://github.com/djachenko/shabbot/commit/15b19546945914b578bd8458abc58923d843601f))
+
+
 ## v0.2.0 (2026-06-12)
 
 ### Bug Fixes
