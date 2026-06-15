@@ -15,6 +15,9 @@ release = ["python-semantic-release", "build"]
 [project.scripts]
 shabbot = "shabbot.bot:main"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/shabbot"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
