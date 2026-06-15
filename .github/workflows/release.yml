@@ -7,7 +7,7 @@ on:
 
 jobs:
   release:
-    uses: djachenko/repokit/.github/workflows/python-release.yml@0.2.0
+    uses: djachenko/repokit/.github/workflows/python-release.yml@0.3
     with:
       package_name: shabbot
     secrets: inherit

@@ -7,7 +7,7 @@ on:
 
 jobs:
   integration:
-    uses: djachenko/repokit/.github/workflows/python-integration.yml@0.2.0
+    uses: djachenko/repokit/.github/workflows/python-integration.yml@0.3
     with:
       package_name: shabbot
     secrets: inherit
