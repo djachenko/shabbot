@@ -21,5 +21,14 @@ Todoist ↔ Google Calendar уже синхронизированы. Через 
 ### Будущее: dotfiles-репо + централизованная Claude memory
 Идея: `~/dotfiles/` с симлинками на `~/.claude/`, `.gitconfig`, `.zshrc` и т.д. Claude memory хранится в `~/dotfiles/claude/memory/<project>/`, в каждом проекте симлинк `memory → ~/dotfiles/claude/memory/<project>`. Не делать пока не закончены текущие приоритеты.
 
+### Два визарда: install.sh и config.py — не DRY, разные контексты
+install.sh спрашивает модель whisper чтобы скачать её. config.py спрашивает токены и модель при первом запуске бота без конфига. Дублирование оправдано: разные цели (bootstrap среды vs runtime fallback), разные языки (bash vs python). Альтернатива — убрать промпты из config.py и сделать его fail-fast — отклонена: пользователь может поставить shabbot без install.sh если whisper уже есть.
+
+### Безусловный save в load_config()
+`config.save()` вызывается при каждом `load_config()`, не только когда что-то было запрошено. Перезапись при каждом старте — безвредна, зато убирает `needs_save` флаг и упрощает код.
+
+### Handler pipeline: _make_handler + _catcher
+Хэндлеры возвращают текст (`str | None`), `bot.py` владеет pipeline через `_make_handler(extractor, error_msg)`. `_catcher` — декоратор внутри `_make_handler`, применяется автоматически — не нужно помнить вешать на каждый новый хэндлер. View (статус-сообщения, пульс-анимация) пока остаётся в handle_voice — полное отделение View запланировано на будущее.
+
 ### TimedOut при скачивании голоса: retry 3 раза
 Первый `TimedOut` = временный сбой сети, не ошибка пользователя. Retry 3 попытки с 2s паузой — после этого user-facing error. Не глотать молча (первый баг: сообщение просто пропадало без ответа).
