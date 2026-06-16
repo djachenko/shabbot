@@ -2,27 +2,10 @@ name: Tests
 
 on:
   push:
+    branches:
+      - '**'
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.x"
-
-      - name: Install dependencies
-        run: pip install -e ".[test]"
-
-      - name: Run tests
-        run: pytest || [ $? -eq 5 ]
-
-      - name: Lint
-        run: ruff check
-
-      - name: Type check
-        run: mypy shabbot/
+  tests:
+    uses: djachenko/repokit/.github/workflows/python-tests.yml@0.3
+    secrets: inherit

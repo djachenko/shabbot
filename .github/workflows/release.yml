@@ -7,70 +7,37 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
-    concurrency: release
-    if: "github.event.head_commit.author.name != 'semantic-release'"
+    uses: djachenko/repokit/.github/workflows/python-release.yml@0.3
+    secrets: inherit
     permissions:
-      id-token: write
       contents: write
 
+  publish:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+
     steps:
-      - uses: actions/create-github-app-token@v1
-        id: app-token
+      - uses: actions/download-artifact@v4
+        id: download
+        continue-on-error: true
         with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          token: ${{ steps.app-token.outputs.token }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.x"
-
-      - name: Install dependencies
-        run: pip install ".[release]"
-
-      - name: Configure git
-        run: |
-          git config user.name "bot@djachenko[bot]"
-          git config user.email "2991967+bot@djachenko[bot]@users.noreply.github.com"
-
-      - name: Run semantic release
-        id: release
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          BEFORE=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          semantic-release version
-          AFTER=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ "$BEFORE" != "$AFTER" ]; then
-            echo "released=true" >> $GITHUB_OUTPUT
-            echo "version=${AFTER#v}" >> $GITHUB_OUTPUT
-          else
-            echo "released=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Build
-        if: steps.release.outputs.released == 'true'
-        run: python -m build
+          name: dist
+          path: dist/
 
       - name: Publish to PyPI
+        if: steps.download.outcome == 'success'
         uses: pypa/gh-action-pypi-publish@release/v1
-        if: steps.release.outputs.released == 'true'
 
-      - name: Smoke test (PyPI)
-        if: steps.release.outputs.released == 'true'
+      - name: Smoke test
+        if: steps.download.outcome == 'success'
         run: |
-          VERSION=${{ steps.release.outputs.version }}
-
+          PACKAGE=$(ls dist/*.whl | head -1 | xargs basename | sed 's/-[0-9].*//')
+          VERSION=$(ls dist/*.tar.gz | sed 's/.*-\(.*\)\.tar\.gz/\1/')
           for i in {1..5}; do
-            pip install shabbot==$VERSION && break
+            pip install $PACKAGE==$VERSION && break
             echo "Attempt $i failed, retrying in 10s..."
             sleep 10
           done
-
-          shabbot --help
+          $PACKAGE --help
