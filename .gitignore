@@ -18,3 +18,4 @@ build/
 
 # os
 .DS_Store
+memory/
