@@ -7,7 +7,7 @@ from shabbot.task import Task
 
 def create_task(task: Task) -> TodoistTask:
     config = load_config()
-    api = TodoistAPI(config["TODOIST_TOKEN"])
+    api = TodoistAPI(config.todoist_token)
 
     parts: list[str] = []
 
