@@ -14,7 +14,23 @@ Telegram bot for capturing tasks with minimal friction. Send text or voice — t
 - Telegram bot token from [@BotFather](https://t.me/BotFather)
 - Todoist API token from [Settings → Integrations → Developer](https://todoist.com/app/settings/integrations/developer)
 
-## Setup
+## Run with Docker (recommended for servers)
+
+```bash
+cp docker.env.example docker.env
+# fill in SHABBOT_TOKEN and TODOIST_TOKEN in docker.env
+docker compose up -d
+```
+
+Whisper model weights (~1.5 GB) are cached in a named volume and survive container restarts.
+
+To pre-download the model before the first voice message:
+
+```bash
+docker compose run --rm shabbot python -c "import whisper; whisper.load_model('large-v3-turbo')"
+```
+
+## Local setup
 
 ```bash
 bash scripts/install.sh
@@ -30,13 +46,7 @@ pipx install -e .
 shabbot  # prompts for tokens on first run
 ```
 
-Pre-download the Whisper model to avoid a delay on the first voice message:
-
-```bash
-python -c "import whisper; whisper.load_model('large-v3-turbo')"
-```
-
-## Run
+## Run locally
 
 ```bash
 shabbot
