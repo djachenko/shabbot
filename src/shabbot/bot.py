@@ -15,13 +15,12 @@ from shabbot.todoist.client import create_task
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-WHISPER_MODEL = "large-v3-turbo"
 WHISPER_BIN = "whisper"
 
 parser = DumbParser()
 
 
-async def transcribe_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str | None:
+async def transcribe_voice(update: Update, context: ContextTypes.DEFAULT_TYPE, whisper_model: str) -> str | None:
     assert update.message is not None
     voice = update.message.voice
     assert voice is not None
@@ -42,7 +41,7 @@ async def transcribe_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                 await asyncio.sleep(2)
 
         result = subprocess.run(
-            [WHISPER_BIN, ogg_path, "--model", WHISPER_MODEL, "--language", "ru", "--output_format", "txt", "--output_dir", tmp],
+            [WHISPER_BIN, ogg_path, "--model", whisper_model, "--language", "ru", "--output_format", "txt", "--output_dir", tmp],
             capture_output=True,
             text=True,
         )
@@ -85,7 +84,7 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     pulse_task = asyncio.create_task(pulse())
 
     try:
-        text = await transcribe_voice(update, context)
+        text = await transcribe_voice(update, context, context.bot_data["whisper_model"])
     except TimedOut:
         pulse_task.cancel()
         log.error("timed out downloading voice file")
@@ -124,7 +123,8 @@ def main() -> None:
 
     config = load_config()
 
-    app = ApplicationBuilder().token(config["SHABBOT_TOKEN"]).build()
+    app = ApplicationBuilder().token(config.shabbot_token).build()
+    app.bot_data["whisper_model"] = config.whisper_model
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_handler(MessageHandler(filters.VOICE, handle_voice))
-    app.run_polling()
+    app.run_polling(drop_pending_updates=False, allowed_updates=Update.ALL_TYPES)

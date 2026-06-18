@@ -32,24 +32,22 @@ source shabbot.env && shabbot
 Переменные:
 - `SHABBOT_TOKEN` — Telegram bot token
 - `TODOIST_TOKEN` — Todoist API token
-- `WHISPER_MODEL` — модель (default: `large`)
-- `WHISPER_BIN` — путь к whisper (default: `~/.local/bin/whisper`)
+- `WHISPER_MODEL` — модель (default: `large-v3-turbo`)
+- `WHISPER_BIN` — путь к whisper (default: `whisper`)
 
 ---
 
 ## Текущее состояние
 
-- Базовая функциональность работает
-- 1 незакоммиченный файл (`bot.py`) — активная доработка
-- Ещё не зарелизен
+- Релиз v0.3.0, src layout (`src/shabbot/`)
+- CI + PSR автоматически выпускают версии при мерже в master
 
 ---
 
 ## Что нужно сделать
 
-1. **Зарелизить**: оформить как нормальный релиз (версия, changelog)
-2. **Docker**: упаковать в контейнер чтобы запускать на сервере без зависимостей от локальной среды
-3. Возможно: LLM-парсер для естественного языка в дату (`parser/base.py` — уже есть заготовка `DumbParser`)
+1. **Docker**: упаковать в контейнер чтобы запускать на сервере без зависимостей от локальной среды
+2. Возможно: LLM-парсер для естественного языка в дату (`src/shabbot/parser/base.py` — заготовка `BaseParser` + `DumbParser` есть)
 
 ---
 

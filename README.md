@@ -17,29 +17,35 @@ Telegram bot for capturing tasks with minimal friction. Send text or voice — t
 ## Setup
 
 ```bash
-pipx install openai-whisper
-pipx install -e .
+bash scripts/install.sh
 ```
 
-Pre-download the Whisper model (avoids a 1.5 GB download on first voice message):
+The script installs Whisper, lets you pick a model, prompts for tokens, and saves config to `~/.config/shabbot/env`.
+
+To install manually:
+
+```bash
+pipx install openai-whisper
+pipx install -e .
+shabbot  # prompts for tokens on first run
+```
+
+Pre-download the Whisper model to avoid a delay on the first voice message:
 
 ```bash
 python -c "import whisper; whisper.load_model('large-v3-turbo')"
 ```
 
-Create a `shabbot.env` file:
-
-```bash
-export SHABBOT_TOKEN=your_telegram_bot_token
-export TODOIST_TOKEN=your_todoist_api_token
-export WHISPER_MODEL=large-v3-turbo  # optional, default: large
-export WHISPER_BIN=~/.local/bin/whisper  # optional
-```
-
 ## Run
 
 ```bash
-source shabbot.env && shabbot
+shabbot
+```
+
+Config is read from `~/.config/shabbot/env`. Optional overrides:
+
+```
+WHISPER_MODEL=large-v3-turbo
 ```
 
 ## Google Calendar sync
