@@ -1,0 +1,10 @@
+services:
+  shabbot:
+    build: .
+    env_file: docker.env
+    volumes:
+      - whisper-cache:/root/.cache/whisper
+    restart: unless-stopped
+
+volumes:
+  whisper-cache:
