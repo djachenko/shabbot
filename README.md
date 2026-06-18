@@ -32,8 +32,8 @@ Create a `shabbot.env` file:
 ```bash
 export SHABBOT_TOKEN=your_telegram_bot_token
 export TODOIST_TOKEN=your_todoist_api_token
-export WHISPER_MODEL=large-v3-turbo  # optional, default: large
-export WHISPER_BIN=~/.local/bin/whisper  # optional
+export WHISPER_MODEL=large-v3-turbo  # optional, default: large-v3-turbo
+export WHISPER_BIN=whisper  # optional
 ```
 
 ## Run
