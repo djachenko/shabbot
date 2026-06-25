@@ -7,7 +7,7 @@ on:
 
 jobs:
   integration:
-    uses: djachenko/repokit/.github/workflows/python-integration.yml@0.3
+    uses: djachenko/repokit/.github/workflows/python-integration.yml@0.6
     secrets: inherit
 
   publish:
@@ -17,7 +17,7 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist/
@@ -37,4 +37,4 @@ jobs:
             echo "Attempt $i failed, retrying in 10s..."
             sleep 10
           done
-          $PACKAGE --help
+          python -c "import $PACKAGE"
