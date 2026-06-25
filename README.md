@@ -16,18 +16,38 @@ Telegram bot for capturing tasks with minimal friction. Send text or voice — t
 
 ## Run with Docker (recommended for servers)
 
+**Prerequisites:** [Docker](https://docs.docker.com/get-docker/) with Compose plugin.
+
 ```bash
+# 1. Clone the repo
+git clone https://github.com/djachenko/shabbot.git
+cd shabbot
+
+# 2. Create env file and fill in your tokens
 cp docker.env.example docker.env
-# fill in SHABBOT_TOKEN and TODOIST_TOKEN in docker.env
+
+# 3. Build and start
 docker compose up -d
 ```
 
-Whisper model weights (~1.5 GB) are cached in a named volume and survive container restarts.
+**docker.env:**
+```
+SHABBOT_TOKEN=<token from @BotFather>
+TODOIST_TOKEN=<token from Todoist → Settings → Integrations → Developer>
+WHISPER_MODEL=large-v3-turbo
+```
 
-To pre-download the model before the first voice message:
+On first start the container downloads the Whisper model (~1.5 GB) before the bot comes online — this takes a few minutes. Subsequent starts are instant: the model is cached in a named Docker volume and survives container restarts and rebuilds.
 
 ```bash
-docker compose run --rm shabbot python -c "import whisper; whisper.load_model('large-v3-turbo')"
+# View logs
+docker compose logs -f
+
+# Stop
+docker compose down
+
+# Restart
+docker compose restart
 ```
 
 ## Local setup
