@@ -1,0 +1,12 @@
+services:
+  shabbot:
+    build: .
+    env_file: docker.env
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - whisper-cache:/root/.cache/whisper
+    restart: unless-stopped
+
+volumes:
+  whisper-cache:

@@ -7,14 +7,36 @@ Telegram bot for capturing tasks with minimal friction. Send text or voice — t
 - **Text message** → task in Todoist with due date = today
 - **Voice message** → transcribed via Whisper → task in Todoist
 
-## Requirements
+## Run with Docker (recommended for servers)
 
-- Python 3.11+
-- [openai-whisper](https://github.com/openai/whisper) installed via pipx
-- Telegram bot token from [@BotFather](https://t.me/BotFather)
-- Todoist API token from [Settings → Integrations → Developer](https://todoist.com/app/settings/integrations/developer)
+**Prerequisites:** [Docker](https://docs.docker.com/get-docker/) with Compose plugin.
 
-## Setup
+```bash
+git clone https://github.com/djachenko/shabbot.git
+cd shabbot
+bash scripts/docker.sh
+```
+
+The script picks a Whisper model, prompts for tokens, writes `docker.env`, and starts the bot.
+
+Or manually:
+
+```bash
+cp docker.env.example docker.env  # fill in tokens
+docker compose up -d
+```
+
+On first start the container downloads the Whisper model (~1.5 GB) before the bot comes online — this takes a few minutes. Subsequent starts are instant: the model is cached in a named Docker volume and survives container restarts and rebuilds.
+
+```bash
+docker compose logs -f   # view logs
+docker compose down      # stop
+docker compose restart   # restart
+```
+
+## Local setup
+
+**Requirements:** Python 3.11+, [openai-whisper](https://github.com/openai/whisper) via pipx, Telegram bot token, Todoist API token.
 
 ```bash
 bash scripts/install.sh
@@ -30,13 +52,7 @@ pipx install -e .
 shabbot  # prompts for tokens on first run
 ```
 
-Pre-download the Whisper model to avoid a delay on the first voice message:
-
-```bash
-python -c "import whisper; whisper.load_model('large-v3-turbo')"
-```
-
-## Run
+## Run locally
 
 ```bash
 shabbot

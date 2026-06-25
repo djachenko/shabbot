@@ -19,21 +19,31 @@ Telegram-бот для захвата задач с минимальным тр�
 
 - Python 3.11+, `python-telegram-bot`, `todoist-api-python`
 - Whisper (openai-whisper) — запускается как внешний процесс через subprocess
-- Переменные окружения через `shabbot.env` (не в репо)
+- Docker + docker-compose для деплоя
+- Переменные окружения через `docker.env` (не в репо, см. `docker.env.example`)
 
 ---
 
 ## Запуск
 
+**Docker (основной способ):**
+
 ```bash
-source shabbot.env && shabbot
+cp docker.env.example docker.env  # заполнить токены
+docker compose up -d
+```
+
+**Локально:**
+
+```bash
+source ~/.config/shabbot/env && shabbot
 ```
 
 Переменные:
 - `SHABBOT_TOKEN` — Telegram bot token
 - `TODOIST_TOKEN` — Todoist API token
 - `WHISPER_MODEL` — модель (default: `large-v3-turbo`)
-- `WHISPER_BIN` — путь к whisper (default: `whisper`)
+- `WHISPER_BIN` — путь к whisper (default: `whisper`, только для локального запуска)
 
 ---
 
@@ -41,13 +51,13 @@ source shabbot.env && shabbot
 
 - Релиз v0.3.0, src layout (`src/shabbot/`)
 - CI + PSR автоматически выпускают версии при мерже в master
+- Docker: протестирован локально, готов к деплою
 
 ---
 
 ## Что нужно сделать
 
-1. **Docker**: упаковать в контейнер чтобы запускать на сервере без зависимостей от локальной среды
-2. Возможно: LLM-парсер для естественного языка в дату (`src/shabbot/parser/base.py` — заготовка `BaseParser` + `DumbParser` есть)
+- Возможно: LLM-парсер для естественного языка в дату (`src/shabbot/parser/base.py` — заготовка `BaseParser` + `DumbParser` есть)
 
 ---
 
