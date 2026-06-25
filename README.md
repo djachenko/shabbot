@@ -7,13 +7,6 @@ Telegram bot for capturing tasks with minimal friction. Send text or voice — t
 - **Text message** → task in Todoist with due date = today
 - **Voice message** → transcribed via Whisper → task in Todoist
 
-## Requirements
-
-- Python 3.11+
-- [openai-whisper](https://github.com/openai/whisper) installed via pipx
-- Telegram bot token from [@BotFather](https://t.me/BotFather)
-- Todoist API token from [Settings → Integrations → Developer](https://todoist.com/app/settings/integrations/developer)
-
 ## Run with Docker (recommended for servers)
 
 **Prerequisites:** [Docker](https://docs.docker.com/get-docker/) with Compose plugin.
@@ -51,6 +44,8 @@ docker compose restart
 ```
 
 ## Local setup
+
+**Requirements:** Python 3.11+, [openai-whisper](https://github.com/openai/whisper) via pipx, Telegram bot token, Todoist API token.
 
 ```bash
 bash scripts/install.sh
