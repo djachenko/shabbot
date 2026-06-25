@@ -2,6 +2,68 @@
 
 <!-- version list -->
 
+## v0.4.0 (2026-06-25)
+
+### Chores
+
+- [repokit] add .repokit to .gitignore
+  ([`a358a9f`](https://github.com/djachenko/shabbot/commit/a358a9fa4750bf29369696ca956fb02d8db27c2e))
+
+- [repokit] update ci workflows
+  ([`dad486d`](https://github.com/djachenko/shabbot/commit/dad486d6375e42a6445e08c41b72c0e50caf4038))
+
+- [repokit] update ci workflows
+  ([`dea4727`](https://github.com/djachenko/shabbot/commit/dea472753128ff9285c9eea086e45c715ebc2798))
+
+- Add Docker deployment files
+  ([`2a6b6c1`](https://github.com/djachenko/shabbot/commit/2a6b6c1cffd70b2a12f697858df4bef226807dcc))
+
+- Add Docker setup script
+  ([`0d9707c`](https://github.com/djachenko/shabbot/commit/0d9707cff2ce352ae4b162715d0c60457e858f9d))
+
+- Add uninstall script
+  ([`920f16a`](https://github.com/djachenko/shabbot/commit/920f16a8f85766a4ac365c06420fd26b7efc00f2))
+
+- Enable unbuffered Python output in compose
+  ([`e0f59f4`](https://github.com/djachenko/shabbot/commit/e0f59f4dfdb27e9095bb4f66550a862bd20a126a))
+
+- Remove old shabbot/ package root
+  ([`230855d`](https://github.com/djachenko/shabbot/commit/230855d41fbca7fab26138f7de8df60ce95a732c))
+
+### Documentation
+
+- Actualize CLAUDE.md and README
+  ([`d7f67af`](https://github.com/djachenko/shabbot/commit/d7f67af0ec69b7692eb9e52d558cf6f885917cc4))
+
+- Add Docker as primary deployment path in README
+  ([`6c01b92`](https://github.com/djachenko/shabbot/commit/6c01b9252782e369ccd0c48cf860cf2a6a55ddfd))
+
+- Expand Docker setup instructions in README
+  ([`632bf9b`](https://github.com/djachenko/shabbot/commit/632bf9b0ccbd5397eca510142a497e28f88b3420))
+
+- Mention docker.sh in README setup section
+  ([`22d50d6`](https://github.com/djachenko/shabbot/commit/22d50d6f2d3d6e4e01448e8aab1cd274115c7b3f))
+
+- Move local requirements under local setup section
+  ([`99e7a5b`](https://github.com/djachenko/shabbot/commit/99e7a5b6efced6c9fb5a9c117bb389452bc9a3f3))
+
+- Update CLAUDE.md to reflect Docker as primary run method
+  ([`0363375`](https://github.com/djachenko/shabbot/commit/0363375bbbd894e2aa601779a5a9f46579e3ee3a))
+
+- Update README to reflect current setup flow and config location
+  ([`dab7bf1`](https://github.com/djachenko/shabbot/commit/dab7bf1e55a865be04ad9156074b34497efc4c57))
+
+### Features
+
+- Add entrypoint that pre-warms Whisper model on container start
+  ([`f3b1306`](https://github.com/djachenko/shabbot/commit/f3b13062883db58f292984fd9f638b5355b7d5ca))
+
+### Refactoring
+
+- Migrate config to dataclass, read whisper_model from config
+  ([`feeca31`](https://github.com/djachenko/shabbot/commit/feeca313f93aec5d0e0bcd88e9b5dd4656525cda))
+
+
 ## v0.3.0 (2026-06-13)
 
 ### Bug Fixes
