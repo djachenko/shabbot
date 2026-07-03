@@ -12,9 +12,7 @@ Telegram bot for capturing tasks with minimal friction. Send text or voice — t
 **Prerequisites:** [Docker](https://docs.docker.com/get-docker/) with Compose plugin.
 
 ```bash
-git clone https://github.com/djachenko/shabbot.git
-cd shabbot
-bash scripts/docker.sh
+curl -fsSL https://raw.githubusercontent.com/djachenko/shabbot/master/scripts/docker.sh | bash
 ```
 
 The script picks a Whisper model, prompts for tokens, writes `docker.env`, and starts the bot.
@@ -36,10 +34,10 @@ docker compose restart   # restart
 
 ## Local setup
 
-**Requirements:** Python 3.11+, [openai-whisper](https://github.com/openai/whisper) via pipx, Telegram bot token, Todoist API token.
+**Requirements:** Python 3.10+, [openai-whisper](https://github.com/openai/whisper) via pipx, Telegram bot token, Todoist API token.
 
 ```bash
-bash scripts/install.sh
+curl -fsSL https://raw.githubusercontent.com/djachenko/shabbot/master/scripts/install.sh | bash
 ```
 
 The script installs Whisper, lets you pick a model, prompts for tokens, and saves config to `~/.config/shabbot/env`.
