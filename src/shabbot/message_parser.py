@@ -57,6 +57,7 @@ class VoiceMessageParserOutput:
         await self._send(f"📝 Распознал: «{text}»")
 
     async def _send(self, message: str) -> None:
+        assert self._update.message is not None
         if self._status is None:
             self._status = await self._update.message.reply_text(message)
         else:
