@@ -1,6 +1,6 @@
 from datetime import date
 
-from shabbot.parser.base import DumbParser
+from shabbot.task_parser import SimpleTaskParser as DumbParser
 
 
 def test_dumb_parser_summary() -> None:
