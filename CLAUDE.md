@@ -57,7 +57,7 @@ source ~/.config/shabbot/env && shabbot
 
 ## Что нужно сделать
 
-- Возможно: LLM-парсер для естественного языка в дату (`src/shabbot/parser/base.py` — заготовка `BaseParser` + `DumbParser` есть)
+- Возможно: LLM-парсер для естественного языка в дату (`src/shabbot/task_parser.py` — заготовка `TaskParser` + `SimpleTaskParser` есть)
 
 ---
 
