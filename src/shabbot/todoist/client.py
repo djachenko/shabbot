@@ -1,14 +1,10 @@
-from todoist_api_python.api import TodoistAPI
+from todoist_api_python.api_async import TodoistAPIAsync
 from todoist_api_python.models import Task as TodoistTask
 
-from shabbot.config import load_config
 from shabbot.task import Task
 
 
-def create_task(task: Task) -> TodoistTask:
-    config = load_config()
-    api = TodoistAPI(config.todoist_token)
-
+async def create_task(task: Task, todoist_token: str) -> TodoistTask:
     parts: list[str] = []
 
     if task.description:
@@ -18,8 +14,9 @@ def create_task(task: Task) -> TodoistTask:
     if task.raw_text and task.raw_text != task.summary:
         parts.append(f"🎙 {task.raw_text}")
 
-    return api.add_task(
-        content=task.summary,
-        description="\n\n".join(parts) if parts else None,
-        due_string="today",
-    )
+    async with TodoistAPIAsync(todoist_token) as api:
+        return await api.add_task(
+            content=task.summary,
+            description="\n\n".join(parts) if parts else None,
+            due_string="today",
+        )

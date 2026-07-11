@@ -16,11 +16,12 @@ class Config:
     shabbot_token: str
     todoist_token: str
     whisper_model: str
+    whisper_bin: str = "whisper"
 
     def save(self) -> None:
         CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
-        with open(CONFIG_FILE, "w") as f:
+        with CONFIG_FILE.open("w") as f:
             f.write(f"SHABBOT_TOKEN={self.shabbot_token}\n")
             f.write(f"TODOIST_TOKEN={self.todoist_token}\n")
             f.write(f"WHISPER_MODEL={self.whisper_model}\n")
@@ -60,11 +61,13 @@ def load_config() -> Config:
     )
 
     whisper_model = os.environ.get("WHISPER_MODEL") or _prompt_model()
+    whisper_bin = os.environ.get("WHISPER_BIN") or "whisper"
 
     config = Config(
         shabbot_token=shabbot_token,
         todoist_token=todoist_token,
         whisper_model=whisper_model,
+        whisper_bin=whisper_bin,
     )
 
     config.save()
