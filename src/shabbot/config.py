@@ -21,7 +21,7 @@ class Config:
     def save(self) -> None:
         CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
-        with open(CONFIG_FILE, "w") as f:
+        with CONFIG_FILE.open("w") as f:
             f.write(f"SHABBOT_TOKEN={self.shabbot_token}\n")
             f.write(f"TODOIST_TOKEN={self.todoist_token}\n")
             f.write(f"WHISPER_MODEL={self.whisper_model}\n")

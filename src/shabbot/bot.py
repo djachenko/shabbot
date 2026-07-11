@@ -50,6 +50,9 @@ async def transcribe_voice(update: Update, context: ContextTypes.DEFAULT_TYPE, c
             stderr=asyncio.subprocess.PIPE,
         )
 
+        log.info("whisper pid=%d started", proc.pid)
+        t0 = asyncio.get_event_loop().time()
+
         try:
             _, stderr = await asyncio.wait_for(proc.communicate(), timeout=WHISPER_TIMEOUT)
         except asyncio.TimeoutError:
@@ -57,6 +60,8 @@ async def transcribe_voice(update: Update, context: ContextTypes.DEFAULT_TYPE, c
             await proc.wait()
             log.error("whisper timed out after %ds", WHISPER_TIMEOUT)
             return None
+
+        log.info("whisper done in %.1fs", asyncio.get_event_loop().time() - t0)
 
         if proc.returncode != 0:
             log.error("whisper error: %s", stderr.decode())
@@ -127,8 +132,15 @@ async def _process(update: Update, text: str, config: Config) -> None:
 def main() -> None:
     config = load_config()
 
-    app = ApplicationBuilder().token(config.shabbot_token).concurrent_updates(True).build()
+    app = ApplicationBuilder() \
+        .token(config.shabbot_token) \
+        .concurrent_updates(True) \
+        .build()
+
     app.bot_data["config"] = config
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_handler(MessageHandler(filters.VOICE, handle_voice))
     app.run_polling(drop_pending_updates=False, allowed_updates=Update.ALL_TYPES)
+
+if __name__ == '__main__':
+    main()
