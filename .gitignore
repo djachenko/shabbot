@@ -20,3 +20,6 @@ build/
 .DS_Store
 memory/
 .repokit
+
+CLAUDE.local.md
+_worktrees/
