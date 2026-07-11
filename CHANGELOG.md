@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v0.4.1 (2026-07-11)
+
+### Bug Fixes
+
+- Add whisper timing logs
+  ([`d6c3116`](https://github.com/djachenko/shabbot/commit/d6c311696efa953a55e77ca7f7a676317f7e1e24))
+
+- Async subprocess for whisper + TodoistAPIAsync
+  ([`8b71316`](https://github.com/djachenko/shabbot/commit/8b71316d4d0a73e7295d4ef346293fcd7f64ff98))
+
+### Documentation
+
+- Replace git clone with curl one-liners, fix Python version
+  ([`02c7ee3`](https://github.com/djachenko/shabbot/commit/02c7ee38448467382b2bc6887c0359d53879b14d))
+
+
 ## v0.4.0 (2026-06-25)
 
 ### Chores
