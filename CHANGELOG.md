@@ -2,6 +2,45 @@
 
 <!-- version list -->
 
+## v0.4.2 (2026-07-11)
+
+### Bug Fixes
+
+- Assert message not None in VoiceMessageParserOutput._send
+  ([`c6bfa6b`](https://github.com/djachenko/shabbot/commit/c6bfa6b87e0898f81b83b58de981a4c61a4815cf))
+
+- Update test import after parser module rename
+  ([`330adb2`](https://github.com/djachenko/shabbot/commit/330adb2d6764d8f38dae7d23e8e4b02746900d0f))
+
+### Chores
+
+- Add CLAUDE.local.md and _worktrees/ to .gitignore
+  ([`f2a9124`](https://github.com/djachenko/shabbot/commit/f2a912430de26b8c323b1bfce679db05b5fa3be3))
+
+### Refactoring
+
+- Add Loggable mixin with cached_property logger
+  ([`70dce8c`](https://github.com/djachenko/shabbot/commit/70dce8c553702ca06a8ddf1582a436d0706d00a6))
+
+- Add message_parser layer with VoiceMessageParserOutput
+  ([`84ef217`](https://github.com/djachenko/shabbot/commit/84ef217fffc5496d40bc793b4b425630487193bb))
+
+- Add Processor as orchestration layer
+  ([`22879dd`](https://github.com/djachenko/shabbot/commit/22879ddf6170e4f63fc76db9edb2bb692f13db2d))
+
+- Consolidate Task and TaskParser into task_parser.py
+  ([`e492ca3`](https://github.com/djachenko/shabbot/commit/e492ca32e5d92fee38b5c66a6c6db1c231c6f0ee))
+
+- Extract TodoistClient class, remove todoist/ subpackage
+  ([`d48c10e`](https://github.com/djachenko/shabbot/commit/d48c10eb3aa1ce6cf7649651615705ccfcf89394))
+
+- Extract Transcriber — accepts Path, no Telegram deps
+  ([`baa5bac`](https://github.com/djachenko/shabbot/commit/baa5bacfe3a242ddee9b130bcbfeb1b2a8a91085))
+
+- Reduce bot.py to composition root
+  ([`eddc7e7`](https://github.com/djachenko/shabbot/commit/eddc7e7129f1816c6aec224a85157b34a8deefb2))
+
+
 ## v0.4.1 (2026-07-11)
 
 ### Bug Fixes
