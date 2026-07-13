@@ -4,6 +4,10 @@ from todoist_api_python.models import Task as TodoistTask
 from shabbot.task_parser import Task
 
 
+class TodoistError(Exception):
+    pass
+
+
 class TodoistClient:
     def __init__(self, token: str) -> None:
         self._token = token
@@ -20,9 +24,16 @@ class TodoistClient:
         if task.raw_text and task.raw_text != task.summary:
             parts.append(f"🎙 {task.raw_text}")
 
-        async with TodoistAPIAsync(self._token) as api:
-            return await api.add_task(
-                content=task.summary,
-                description="\n\n".join(parts) if parts else None,
-                due_string="today",
-            )
+        description: str | None = None
+        if parts:
+            description = "\n\n".join(parts)
+
+        try:
+            async with TodoistAPIAsync(self._token) as api:
+                return await api.add_task(
+                    content=task.summary,
+                    description=description,
+                    due_string="today",
+                )
+        except Exception as e:
+            raise TodoistError(str(e)) from e

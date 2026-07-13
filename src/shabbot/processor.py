@@ -31,10 +31,6 @@ class Processor(Loggable):
         assert update.effective_user is not None
 
         message = await message_parser.parse_update(update, context)
-
-        if message is None:
-            return
-
         task = self._task_parser.parse(message.text)
 
         self.logger.info("creating todoist task: %r", task.summary)
