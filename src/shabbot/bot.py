@@ -1,7 +1,7 @@
 import logging
 
 from telegram import Update
-from telegram.ext import ApplicationBuilder, MessageHandler, filters
+from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 
 from shabbot.config import load_config
 from shabbot.message_parser import TextMessageParser, VoiceMessageParser
@@ -33,8 +33,15 @@ def main() -> None:
         .concurrent_updates(True) \
         .build()
 
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, processor.handle_text))
-    app.add_handler(MessageHandler(filters.VOICE, processor.handle_voice))
+    allowed = filters.Chat(chat_id=config.allowed_chat_id)
+
+    async def _reject(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+        if update.effective_message:
+            await update.effective_message.reply_text("🚫")
+
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & allowed, processor.handle_text))
+    app.add_handler(MessageHandler(filters.VOICE & allowed, processor.handle_voice))
+    app.add_handler(MessageHandler(filters.ALL & ~allowed, _reject))
     app.run_polling(drop_pending_updates=False, allowed_updates=Update.ALL_TYPES)
 
 
