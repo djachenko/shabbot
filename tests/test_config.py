@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -58,6 +59,7 @@ class TestConfigSave:
         assert "TODOIST_TOKEN=td-token" in content
         assert "WHISPER_MODEL=tiny" in content
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="chmod 600 is Unix-only")
     def test_file_permissions(self, tmp_path: Path) -> None:
         """Config.save() выставляет chmod 600 на env-файл"""
         config = Config(
