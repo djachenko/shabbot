@@ -39,6 +39,12 @@ docker compose up -d
 source ~/.config/shabbot/env && shabbot
 ```
 
+**Тесты:**
+
+```bash
+.venv/bin/pytest tests/
+```
+
 Переменные:
 - `SHABBOT_TOKEN` — Telegram bot token
 - `TODOIST_TOKEN` — Todoist API token
