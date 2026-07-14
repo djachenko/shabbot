@@ -45,6 +45,7 @@ async def _reject(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_message:
         await update.effective_message.reply_text("🚫")
 
+
 def main() -> None:
     config = load_config()
 
