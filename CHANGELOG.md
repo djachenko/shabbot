@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v0.4.3 (2026-07-14)
+
+### Bug Fixes
+
+- Remove unused os import in test_config
+  ([`a249dbe`](https://github.com/djachenko/shabbot/commit/a249dbe4086bea5c7f6f907135963009f8b76251))
+
+- Skip chmod test on Windows
+  ([`97668a5`](https://github.com/djachenko/shabbot/commit/97668a5d064839a183714fc9a930559bf8861a4e))
+
+### Testing
+
+- Add unit tests for all modules
+  ([`aa709d5`](https://github.com/djachenko/shabbot/commit/aa709d5b98cdfb18b0fc5f6f2f42a5b9548e3b78))
+
+
 ## v0.4.2 (2026-07-11)
 
 ### Bug Fixes
