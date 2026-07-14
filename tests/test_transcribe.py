@@ -70,7 +70,7 @@ class TestTranscriber:
 class TestTranscriberFailures:
     @pytest.mark.anyio
     async def test_timeout_raises(self, transcriber: Transcriber, tmp_path: Path) -> None:
-        """transcribe() бросает TranscriptionError при таймауте whisper"""
+        """transcribe() бросает TranscriptionError с сообщением о таймауте"""
         ogg = tmp_path / "voice.ogg"
         ogg.touch()
 
@@ -82,17 +82,17 @@ class TestTranscriberFailures:
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=proc)):
             with patch("asyncio.wait_for", AsyncMock(side_effect=asyncio.TimeoutError)):
-                with pytest.raises(TranscriptionError):
+                with pytest.raises(TranscriptionError, match="timed out"):
                     await transcriber.transcribe(ogg)
 
     @pytest.mark.anyio
     async def test_nonzero_exit_raises(self, transcriber: Transcriber, tmp_path: Path) -> None:
-        """transcribe() бросает TranscriptionError при ненулевом коде возврата"""
+        """transcribe() бросает TranscriptionError с сообщением о ненулевом коде"""
         ogg = tmp_path / "voice.ogg"
         ogg.touch()
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=_mock_proc(returncode=1, stderr=b"error"))):
-            with pytest.raises(TranscriptionError):
+            with pytest.raises(TranscriptionError, match="non-zero exit"):
                 await transcriber.transcribe(ogg)
 
     @pytest.mark.anyio
@@ -102,5 +102,5 @@ class TestTranscriberFailures:
         ogg.touch()
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=_mock_proc())):
-            with pytest.raises(TranscriptionError):
+            with pytest.raises(TranscriptionError, match="not found"):
                 await transcriber.transcribe(ogg)
