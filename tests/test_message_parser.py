@@ -78,21 +78,20 @@ class TestVoiceMessageParserOutput:
         assert "Купить молоко" in call_text
 
     @pytest.mark.anyio
-    async def test_transcribe_error_sends_error(self) -> None:
-        """transcribe_error() отправляет сообщение об ошибке"""
+    async def test_delete_removes_status(self) -> None:
+        """delete() удаляет статус-сообщение если оно было отправлено"""
         update = _make_update()
         output = VoiceMessageParserOutput(update)
 
-        await output.transcribe_error()
+        await output.transcribe_pulse()
+        await output.delete()
 
-        update.message.reply_text.assert_awaited_once()
+        update.message.reply_text.return_value.delete.assert_awaited_once()
 
     @pytest.mark.anyio
-    async def test_timeout_error_sends_message(self) -> None:
-        """timeout_error() отправляет сообщение о таймауте"""
+    async def test_delete_noop_without_status(self) -> None:
+        """delete() не падает если статус-сообщение ещё не отправлялось"""
         update = _make_update()
         output = VoiceMessageParserOutput(update)
 
-        await output.timeout_error()
-
-        update.message.reply_text.assert_awaited_once()
+        await output.delete()  # не должно бросать

@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from shabbot.transcribe import Transcriber
+from shabbot.transcribe import Transcriber, TranscriptionError
 
 
 def _mock_proc(returncode: int = 0, stderr: bytes = b"") -> MagicMock:
@@ -69,8 +69,8 @@ class TestTranscriber:
 
 class TestTranscriberFailures:
     @pytest.mark.anyio
-    async def test_timeout_returns_none(self, transcriber: Transcriber, tmp_path: Path) -> None:
-        """transcribe() возвращает None при таймауте whisper"""
+    async def test_timeout_raises(self, transcriber: Transcriber, tmp_path: Path) -> None:
+        """transcribe() бросает TranscriptionError при таймауте whisper"""
         ogg = tmp_path / "voice.ogg"
         ogg.touch()
 
@@ -82,28 +82,25 @@ class TestTranscriberFailures:
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=proc)):
             with patch("asyncio.wait_for", AsyncMock(side_effect=asyncio.TimeoutError)):
-                result = await transcriber.transcribe(ogg)
-
-        assert result is None
+                with pytest.raises(TranscriptionError):
+                    await transcriber.transcribe(ogg)
 
     @pytest.mark.anyio
-    async def test_nonzero_exit_returns_none(self, transcriber: Transcriber, tmp_path: Path) -> None:
-        """transcribe() возвращает None при ненулевом коде возврата"""
+    async def test_nonzero_exit_raises(self, transcriber: Transcriber, tmp_path: Path) -> None:
+        """transcribe() бросает TranscriptionError при ненулевом коде возврата"""
         ogg = tmp_path / "voice.ogg"
         ogg.touch()
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=_mock_proc(returncode=1, stderr=b"error"))):
-            result = await transcriber.transcribe(ogg)
-
-        assert result is None
+            with pytest.raises(TranscriptionError):
+                await transcriber.transcribe(ogg)
 
     @pytest.mark.anyio
-    async def test_missing_txt_returns_none(self, transcriber: Transcriber, tmp_path: Path) -> None:
-        """transcribe() возвращает None если whisper не создал .txt"""
+    async def test_missing_txt_raises(self, transcriber: Transcriber, tmp_path: Path) -> None:
+        """transcribe() бросает TranscriptionError если whisper не создал .txt"""
         ogg = tmp_path / "voice.ogg"
         ogg.touch()
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=_mock_proc())):
-            result = await transcriber.transcribe(ogg)
-
-        assert result is None
+            with pytest.raises(TranscriptionError):
+                await transcriber.transcribe(ogg)
