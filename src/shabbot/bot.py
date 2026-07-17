@@ -41,7 +41,7 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 
     await context.bot.send_message(update.effective_chat.id, msg)
 
-async def _reject(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+async def reject(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_message:
         await update.effective_message.reply_text("🚫")
 
@@ -70,7 +70,7 @@ def main() -> None:
 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & allowed, processor.handle_text))
     app.add_handler(MessageHandler(filters.VOICE & allowed, processor.handle_voice))
-    app.add_handler(MessageHandler(filters.ALL & ~allowed, _reject))
+    app.add_handler(MessageHandler(filters.ALL & ~allowed, reject))
     app.add_error_handler(error_handler)
 
     app.run_polling(drop_pending_updates=False, allowed_updates=Update.ALL_TYPES)

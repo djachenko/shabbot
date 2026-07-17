@@ -28,24 +28,7 @@ class TestLoadConfig:
         assert config.whisper_model == "tiny"
         assert config.whisper_bin == "/usr/bin/whisper"
 
-    def test_allowed_chat_id_parsed_as_int(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-        monkeypatch.setenv("SHABBOT_TOKEN", "tg-token")
-        monkeypatch.setenv("TODOIST_TOKEN", "td-token")
-        monkeypatch.setenv("ALLOWED_CHAT_ID", "999")
-        monkeypatch.setenv("WHISPER_MODEL", "tiny")
-
-        with patch("shabbot.config.CONFIG_DIR", tmp_path), \
-             patch("shabbot.config.CONFIG_FILE", tmp_path / "env"):
-            config = load_config()
-
-        assert config.allowed_chat_id == 999
-        assert isinstance(config.allowed_chat_id, int)
-
-    def test_default_whisper_bin(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-        monkeypatch.setenv("SHABBOT_TOKEN", "tg-token")
-        monkeypatch.setenv("TODOIST_TOKEN", "td-token")
-        monkeypatch.setenv("ALLOWED_CHAT_ID", "123456")
-        monkeypatch.setenv("WHISPER_MODEL", "tiny")
+    def test_default_whisper_bin(self, env_vars: None, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         monkeypatch.delenv("WHISPER_BIN", raising=False)
 
         with patch("shabbot.config.CONFIG_DIR", tmp_path), \

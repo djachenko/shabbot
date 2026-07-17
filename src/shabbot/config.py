@@ -62,10 +62,7 @@ def load_config() -> Config:
         "https://todoist.com/app/settings/integrations/developer",
     )
 
-    allowed_chat_id_raw = os.environ.get("ALLOWED_CHAT_ID") or _prompt_secret(
-        "ALLOWED_CHAT_ID",
-        "your Telegram chat ID (send /start to @userinfobot)",
-    )
+    allowed_chat_id_raw = os.environ.get("ALLOWED_CHAT_ID") or input("\nALLOWED_CHAT_ID (send /start to @userinfobot): ").strip()
     allowed_chat_id = int(allowed_chat_id_raw)
 
     whisper_model = os.environ.get("WHISPER_MODEL") or _prompt_model()
