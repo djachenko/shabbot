@@ -14,6 +14,7 @@ def _mock_proc(returncode: int = 0, stderr: bytes = b"") -> MagicMock:
     proc.communicate = AsyncMock(return_value=(b"", stderr))
     proc.kill = MagicMock()
     proc.wait = AsyncMock()
+
     return proc
 
 
@@ -28,6 +29,7 @@ class TestTranscriber:
         """transcribe() возвращает содержимое .txt файла"""
         ogg = tmp_path / "voice.ogg"
         ogg.touch()
+
         (tmp_path / "voice.txt").write_text("Привет мир", encoding="utf-8")
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=_mock_proc())):
@@ -40,6 +42,7 @@ class TestTranscriber:
         """transcribe() убирает пробелы и переносы строк вокруг текста"""
         ogg = tmp_path / "voice.ogg"
         ogg.touch()
+
         (tmp_path / "voice.txt").write_text("  hello  \n", encoding="utf-8")
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=_mock_proc())):
@@ -82,7 +85,7 @@ class TestTranscriberFailures:
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=proc)):
             with patch("asyncio.wait_for", AsyncMock(side_effect=asyncio.TimeoutError)):
-                with pytest.raises(TranscriptionError, match="timed out"):
+                with pytest.raises(TranscriptionError, match=TranscriptionError.TIMEOUT):
                     await transcriber.transcribe(ogg)
 
     @pytest.mark.anyio
@@ -92,7 +95,7 @@ class TestTranscriberFailures:
         ogg.touch()
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=_mock_proc(returncode=1, stderr=b"error"))):
-            with pytest.raises(TranscriptionError, match="non-zero exit"):
+            with pytest.raises(TranscriptionError, match=TranscriptionError.NONZERO_EXIT):
                 await transcriber.transcribe(ogg)
 
     @pytest.mark.anyio
@@ -102,5 +105,5 @@ class TestTranscriberFailures:
         ogg.touch()
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=_mock_proc())):
-            with pytest.raises(TranscriptionError, match="not found"):
+            with pytest.raises(TranscriptionError, match=TranscriptionError.MISSING_TXT):
                 await transcriber.transcribe(ogg)

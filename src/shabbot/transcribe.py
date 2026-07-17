@@ -7,7 +7,9 @@ WHISPER_TIMEOUT = 300
 
 
 class TranscriptionError(Exception):
-    pass
+    TIMEOUT = "whisper timed out"
+    NONZERO_EXIT = "whisper non-zero exit"
+    MISSING_TXT = "txt output not found"
 
 
 class Transcriber(Loggable):
@@ -35,19 +37,20 @@ class Transcriber(Loggable):
         except asyncio.TimeoutError:
             proc.kill()
             await proc.wait()
+
             self.logger.error("whisper timed out after %ds", WHISPER_TIMEOUT)
-            raise TranscriptionError("whisper timed out")
+            raise TranscriptionError(TranscriptionError.TIMEOUT)
 
         end_time = asyncio.get_event_loop().time()
         self.logger.info("whisper done in %.1fs", end_time - start_time)
 
         if proc.returncode != 0:
             self.logger.error("whisper error: %s", stderr.decode())
-            raise TranscriptionError("whisper non-zero exit")
+            raise TranscriptionError(TranscriptionError.NONZERO_EXIT)
 
         txt_path = ogg_path.with_suffix(".txt")
 
         if not txt_path.exists():
-            raise TranscriptionError("txt output not found")
+            raise TranscriptionError(TranscriptionError.MISSING_TXT)
 
         return txt_path.read_text(encoding="utf-8").strip()
