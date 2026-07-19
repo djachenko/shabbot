@@ -48,13 +48,17 @@ def main() -> None:
         elif isinstance(context.error, TodoistError):
             msg = "❌ не получилось добавить задачу"
         else:
-            text = ""
             if update.effective_message:
                 text = update.effective_message.text or update.effective_message.caption or ""
-            suffix = ""
+            else:
+                text = ""
+
             if text:
-                suffix = f". Текст был: {text}"
-            msg = f"❌ не получилось{suffix}"
+                suffix = f" Текст был: {text}."
+            else:
+                suffix = ""
+
+            msg = f"❌ не получилось.{suffix}"
 
         await context.bot.send_message(update.effective_chat.id, msg)
 
