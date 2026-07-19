@@ -2,6 +2,51 @@
 
 <!-- version list -->
 
+## v0.5.0 (2026-07-19)
+
+### Bug Fixes
+
+- Restructure generic error message formatting in error_handler
+  ([`43b4502`](https://github.com/djachenko/shabbot/commit/43b450225cc0194cdf04c3fb2a0a6b7129bf8728))
+
+### Chores
+
+- Add _claude to .gitignore
+  ([`3031ed5`](https://github.com/djachenko/shabbot/commit/3031ed5a2cb81960c1e86ab2747700b44d88e65b))
+
+### Code Style
+
+- Breathing in parse_update and _download_and_transcribe
+  ([`03ece31`](https://github.com/djachenko/shabbot/commit/03ece31c68984086eb8767eeaa060d3a5b435cd2))
+
+- Review fixes — breathing space, dedup cancel/gather, multiline create_files
+  ([`0f38417`](https://github.com/djachenko/shabbot/commit/0f38417ed7615899083b3857c04577104b3f836f))
+
+### Features
+
+- Error handler + custom exceptions per module
+  ([`83b76e1`](https://github.com/djachenko/shabbot/commit/83b76e1c9b15cacbc42883d212d73e24b9bc5e81))
+
+### Refactoring
+
+- Explicit if/else for description in create_task
+  ([`c50f306`](https://github.com/djachenko/shabbot/commit/c50f306bba5e32eb8cff17fa1d2bce062930002a))
+
+- Extract TranscriptionError messages as class constants
+  ([`b1c533e`](https://github.com/djachenko/shabbot/commit/b1c533e4ff8071653fc4e0acac679c0e589f4e87))
+
+### Testing
+
+- Add create_files fixture to conftest, use in test_transcribe
+  ([`f86a872`](https://github.com/djachenko/shabbot/commit/f86a8725c4e3251cb43c9ed27e4b6b707558952d))
+
+- Assert specific TranscriptionError messages per failure path
+  ([`08d03df`](https://github.com/djachenko/shabbot/commit/08d03df8decb3717bdae64b78a552cb6ec63df39))
+
+- Update tests for exception-based error handling
+  ([`fb353ac`](https://github.com/djachenko/shabbot/commit/fb353acfdcaba6dfbf7e81e73ba63dd9936202e5))
+
+
 ## v0.4.3 (2026-07-14)
 
 ### Bug Fixes
