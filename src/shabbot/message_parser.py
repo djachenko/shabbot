@@ -76,6 +76,7 @@ class VoiceMessageParser(MessageParser, Loggable):
         assert update.message.voice is not None
 
         self.logger.info("voice from %s", update.effective_user.username)
+
         output = VoiceMessageParserOutput(update)
 
         async def pulse() -> None:
@@ -124,6 +125,7 @@ class VoiceMessageParser(MessageParser, Loggable):
                 except TimedOut:
                     if attempt == 2:
                         raise
+
                     self.logger.warning("download timed out, retrying (%d/3)", attempt + 1)
                     await asyncio.sleep(2 ** attempt)
 
