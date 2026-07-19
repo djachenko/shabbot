@@ -9,7 +9,11 @@ from telegram.error import TimedOut
 from telegram.ext import ContextTypes
 
 from shabbot.loggable import Loggable
-from shabbot.transcribe import Transcriber
+from shabbot.transcribe import Transcriber, TranscriptionError
+
+
+class MessageParseError(Exception):
+    pass
 
 
 @dataclass(frozen=True)
@@ -19,12 +23,12 @@ class Message:
 
 class MessageParser(ABC):
     @abstractmethod
-    async def parse_update(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> Message | None:
+    async def parse_update(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> Message:
         pass
 
 
 class TextMessageParser(MessageParser, Loggable):
-    async def parse_update(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> Message | None:
+    async def parse_update(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> Message:
         assert update.message is not None
         assert update.effective_user is not None
 
@@ -47,14 +51,12 @@ class VoiceMessageParserOutput:
         self._pulse_count += 1
         self._pulse_count %= 5
 
-    async def timeout_error(self) -> None:
-        await self._send("❌ Таймаут при загрузке файла, попробуй ещё раз")
-
-    async def transcribe_error(self) -> None:
-        await self._send("❌ Не удалось распознать голос")
-
     async def transcribe_success(self, text: str) -> None:
         await self._send(f"📝 Распознал: «{text}»")
+
+    async def delete(self) -> None:
+        if self._status is not None:
+            await self._status.delete()
 
     async def _send(self, message: str) -> None:
         assert self._update.message is not None
@@ -68,12 +70,13 @@ class VoiceMessageParser(MessageParser, Loggable):
     def __init__(self, transcriber: Transcriber) -> None:
         self._transcriber = transcriber
 
-    async def parse_update(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> Message | None:
+    async def parse_update(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> Message:
         assert update.message is not None
         assert update.effective_user is not None
         assert update.message.voice is not None
 
         self.logger.info("voice from %s", update.effective_user.username)
+
         output = VoiceMessageParserOutput(update)
 
         async def pulse() -> None:
@@ -85,19 +88,17 @@ class VoiceMessageParser(MessageParser, Loggable):
 
         try:
             text = await self._download_and_transcribe(update, context)
-        except TimedOut:
-            self.logger.error("timed out downloading voice file")
-            await output.timeout_error()
+        except TimedOut as e:
+            await output.delete()
 
-            return None
+            raise MessageParseError("download timed out") from e
+        except TranscriptionError:
+            await output.delete()
+
+            raise
         finally:
             pulse_task.cancel()
             await asyncio.gather(pulse_task, return_exceptions=True)
-
-        if text is None:
-            await output.transcribe_error()
-
-            return None
 
         self.logger.info("transcribed: %r", text)
         await output.transcribe_success(text)
@@ -108,7 +109,7 @@ class VoiceMessageParser(MessageParser, Loggable):
         self,
         update: Update,
         context: ContextTypes.DEFAULT_TYPE,
-    ) -> str | None:
+    ) -> str:
         assert update.message is not None
         assert update.message.voice is not None
 
@@ -124,6 +125,7 @@ class VoiceMessageParser(MessageParser, Loggable):
                 except TimedOut:
                     if attempt == 2:
                         raise
+
                     self.logger.warning("download timed out, retrying (%d/3)", attempt + 1)
                     await asyncio.sleep(2 ** attempt)
 

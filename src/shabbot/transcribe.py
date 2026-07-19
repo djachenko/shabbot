@@ -6,12 +6,18 @@ from shabbot.loggable import Loggable
 WHISPER_TIMEOUT = 300
 
 
+class TranscriptionError(Exception):
+    TIMEOUT = "whisper timed out"
+    NONZERO_EXIT = "whisper non-zero exit"
+    MISSING_TXT = "txt output not found"
+
+
 class Transcriber(Loggable):
     def __init__(self, whisper_bin: str, whisper_model: str) -> None:
         self._whisper_bin = whisper_bin
         self._whisper_model = whisper_model
 
-    async def transcribe(self, ogg_path: Path) -> str | None:
+    async def transcribe(self, ogg_path: Path) -> str:
         proc = await asyncio.create_subprocess_exec(
             self._whisper_bin,
             str(ogg_path),
@@ -31,20 +37,20 @@ class Transcriber(Loggable):
         except asyncio.TimeoutError:
             proc.kill()
             await proc.wait()
+
             self.logger.error("whisper timed out after %ds", WHISPER_TIMEOUT)
-            return None
+            raise TranscriptionError(TranscriptionError.TIMEOUT)
 
         end_time = asyncio.get_event_loop().time()
         self.logger.info("whisper done in %.1fs", end_time - start_time)
 
         if proc.returncode != 0:
             self.logger.error("whisper error: %s", stderr.decode())
-
-            return None
+            raise TranscriptionError(TranscriptionError.NONZERO_EXIT)
 
         txt_path = ogg_path.with_suffix(".txt")
 
         if not txt_path.exists():
-            return None
+            raise TranscriptionError(TranscriptionError.MISSING_TXT)
 
         return txt_path.read_text(encoding="utf-8").strip()

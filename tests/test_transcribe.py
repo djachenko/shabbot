@@ -1,10 +1,11 @@
 import asyncio
 from pathlib import Path
+from typing import Callable
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from shabbot.transcribe import Transcriber
+from shabbot.transcribe import Transcriber, TranscriptionError
 
 
 def _mock_proc(returncode: int = 0, stderr: bytes = b"") -> MagicMock:
@@ -14,6 +15,7 @@ def _mock_proc(returncode: int = 0, stderr: bytes = b"") -> MagicMock:
     proc.communicate = AsyncMock(return_value=(b"", stderr))
     proc.kill = MagicMock()
     proc.wait = AsyncMock()
+
     return proc
 
 
@@ -24,11 +26,13 @@ def transcriber() -> Transcriber:
 
 class TestTranscriber:
     @pytest.mark.anyio
-    async def test_returns_txt_content(self, transcriber: Transcriber, tmp_path: Path) -> None:
+    async def test_returns_txt_content(self, transcriber: Transcriber, tmp_path: Path, create_files: Callable) -> None:
         """transcribe() возвращает содержимое .txt файла"""
+        create_files(tmp_path, {
+            "voice.ogg": None,
+            "voice.txt": "Привет мир",
+        })
         ogg = tmp_path / "voice.ogg"
-        ogg.touch()
-        (tmp_path / "voice.txt").write_text("Привет мир", encoding="utf-8")
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=_mock_proc())):
             result = await transcriber.transcribe(ogg)
@@ -36,11 +40,13 @@ class TestTranscriber:
         assert result == "Привет мир"
 
     @pytest.mark.anyio
-    async def test_strips_whitespace(self, transcriber: Transcriber, tmp_path: Path) -> None:
+    async def test_strips_whitespace(self, transcriber: Transcriber, tmp_path: Path, create_files: Callable) -> None:
         """transcribe() убирает пробелы и переносы строк вокруг текста"""
+        create_files(tmp_path, {
+            "voice.ogg": None,
+            "voice.txt": "  hello  \n",
+        })
         ogg = tmp_path / "voice.ogg"
-        ogg.touch()
-        (tmp_path / "voice.txt").write_text("  hello  \n", encoding="utf-8")
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=_mock_proc())):
             result = await transcriber.transcribe(ogg)
@@ -48,11 +54,13 @@ class TestTranscriber:
         assert result == "hello"
 
     @pytest.mark.anyio
-    async def test_calls_whisper_with_correct_args(self, transcriber: Transcriber, tmp_path: Path) -> None:
+    async def test_calls_whisper_with_correct_args(self, transcriber: Transcriber, tmp_path: Path, create_files: Callable) -> None:
         """transcribe() передаёт правильные аргументы и модель в whisper"""
+        create_files(tmp_path, {
+            "voice.ogg": None,
+            "voice.txt": "text",
+        })
         ogg = tmp_path / "voice.ogg"
-        ogg.touch()
-        (tmp_path / "voice.txt").write_text("text", encoding="utf-8")
 
         mock_exec = AsyncMock(return_value=_mock_proc())
         with patch("asyncio.create_subprocess_exec", mock_exec):
@@ -69,10 +77,12 @@ class TestTranscriber:
 
 class TestTranscriberFailures:
     @pytest.mark.anyio
-    async def test_timeout_returns_none(self, transcriber: Transcriber, tmp_path: Path) -> None:
-        """transcribe() возвращает None при таймауте whisper"""
+    async def test_timeout_raises(self, transcriber: Transcriber, tmp_path: Path, create_files: Callable) -> None:
+        """transcribe() бросает TranscriptionError с сообщением о таймауте"""
+        create_files(tmp_path, {
+            "voice.ogg": None,
+        })
         ogg = tmp_path / "voice.ogg"
-        ogg.touch()
 
         proc = MagicMock()
         proc.pid = 12345
@@ -82,28 +92,29 @@ class TestTranscriberFailures:
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=proc)):
             with patch("asyncio.wait_for", AsyncMock(side_effect=asyncio.TimeoutError)):
-                result = await transcriber.transcribe(ogg)
-
-        assert result is None
+                with pytest.raises(TranscriptionError, match=TranscriptionError.TIMEOUT):
+                    await transcriber.transcribe(ogg)
 
     @pytest.mark.anyio
-    async def test_nonzero_exit_returns_none(self, transcriber: Transcriber, tmp_path: Path) -> None:
-        """transcribe() возвращает None при ненулевом коде возврата"""
+    async def test_nonzero_exit_raises(self, transcriber: Transcriber, tmp_path: Path, create_files: Callable) -> None:
+        """transcribe() бросает TranscriptionError с сообщением о ненулевом коде"""
+        create_files(tmp_path, {
+            "voice.ogg": None,
+        })
         ogg = tmp_path / "voice.ogg"
-        ogg.touch()
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=_mock_proc(returncode=1, stderr=b"error"))):
-            result = await transcriber.transcribe(ogg)
-
-        assert result is None
+            with pytest.raises(TranscriptionError, match=TranscriptionError.NONZERO_EXIT):
+                await transcriber.transcribe(ogg)
 
     @pytest.mark.anyio
-    async def test_missing_txt_returns_none(self, transcriber: Transcriber, tmp_path: Path) -> None:
-        """transcribe() возвращает None если whisper не создал .txt"""
+    async def test_missing_txt_raises(self, transcriber: Transcriber, tmp_path: Path, create_files: Callable) -> None:
+        """transcribe() бросает TranscriptionError если whisper не создал .txt"""
+        create_files(tmp_path, {
+            "voice.ogg": None,
+        })
         ogg = tmp_path / "voice.ogg"
-        ogg.touch()
 
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=_mock_proc())):
-            result = await transcriber.transcribe(ogg)
-
-        assert result is None
+            with pytest.raises(TranscriptionError, match=TranscriptionError.MISSING_TXT):
+                await transcriber.transcribe(ogg)

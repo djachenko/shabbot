@@ -98,21 +98,15 @@ class TestProcessorProcess:
         assert "task-123" in reply_text
 
     @pytest.mark.anyio
-    async def test_skips_todoist_when_message_is_none(self) -> None:
-        """_process() не создаёт задачу если parser вернул None"""
-        processor, _, _, todoist = _make_processor(message=None)
+    async def test_propagates_parser_exception(self) -> None:
+        """_process() пробрасывает исключение из parser не перехватывая"""
+        from shabbot.message_parser import MessageParseError
+
+        processor, text_parser, _, todoist = _make_processor()
+        text_parser.parse_update = AsyncMock(side_effect=MessageParseError("download timed out"))
         update = _make_update()
 
-        await processor.handle_text(update, MagicMock())
+        with pytest.raises(MessageParseError):
+            await processor.handle_text(update, MagicMock())
 
         todoist.create_task.assert_not_awaited()
-
-    @pytest.mark.anyio
-    async def test_skips_reply_when_message_is_none(self) -> None:
-        """_process() не отвечает в чат если parser вернул None"""
-        processor, _, _, _ = _make_processor(message=None)
-        update = _make_update()
-
-        await processor.handle_text(update, MagicMock())
-
-        update.message.reply_text.assert_not_awaited()

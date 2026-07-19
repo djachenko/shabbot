@@ -19,6 +19,7 @@ build/
 # os
 .DS_Store
 memory/
+_claude
 .repokit
 
 CLAUDE.local.md
