@@ -24,9 +24,10 @@ class TodoistClient:
         if task.raw_text and task.raw_text != task.summary:
             parts.append(f"🎙 {task.raw_text}")
 
-        description: str | None = None
         if parts:
-            description = "\n\n".join(parts)
+            description: str | None = "\n\n".join(parts)
+        else:
+            description = None
 
         try:
             async with TodoistAPIAsync(self._token) as api:
