@@ -88,14 +88,12 @@ class VoiceMessageParser(MessageParser, Loggable):
         try:
             text = await self._download_and_transcribe(update, context)
         except TimedOut as e:
-            pulse_task.cancel()
-            await asyncio.gather(pulse_task, return_exceptions=True)
             await output.delete()
+
             raise MessageParseError("download timed out") from e
         except TranscriptionError:
-            pulse_task.cancel()
-            await asyncio.gather(pulse_task, return_exceptions=True)
             await output.delete()
+
             raise
         finally:
             pulse_task.cancel()
