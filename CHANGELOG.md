@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v0.6.0 (2026-07-20)
+
+### Features
+
+- Add chat_id allowlist
+  ([`14942dc`](https://github.com/djachenko/shabbot/commit/14942dce7926486ecc3cfbd0de48b726666101be))
+
+### Refactoring
+
+- Use input() for ALLOWED_CHAT_ID prompt, simplify tests
+  ([`3aed41e`](https://github.com/djachenko/shabbot/commit/3aed41e3d1076d5f76df73b48219a05616119fc7))
+
+### Testing
+
+- Add tests for chat_id allowlist
+  ([`13ff0ef`](https://github.com/djachenko/shabbot/commit/13ff0efa1696b0f7532a623216bc413948635bf5))
+
+
 ## v0.5.0 (2026-07-19)
 
 ### Bug Fixes
