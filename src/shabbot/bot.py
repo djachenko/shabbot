@@ -12,6 +12,39 @@ from shabbot.transcribe import Transcriber, TranscriptionError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
+logger = logging.getLogger(__name__)
+
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.error("unhandled exception", exc_info=context.error)
+
+    if not isinstance(update, Update) or update.effective_chat is None:
+        return
+
+    if isinstance(context.error, TranscriptionError):
+        msg = "❌ не удалось распознать голос"
+    elif isinstance(context.error, MessageParseError):
+        msg = "❌ не удалось загрузить голосовое сообщение"
+    elif isinstance(context.error, TodoistError):
+        msg = "❌ не получилось добавить задачу"
+    else:
+        if update.effective_message:
+            text = update.effective_message.text or update.effective_message.caption or ""
+        else:
+            text = ""
+
+        if text:
+            suffix = f" Текст был: {text}."
+        else:
+            suffix = ""
+
+        msg = f"❌ не получилось.{suffix}"
+
+    await context.bot.send_message(update.effective_chat.id, msg)
+
+async def reject(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.effective_message:
+        await update.effective_message.reply_text("🚫")
+
 
 def main() -> None:
     config = load_config()
@@ -33,38 +66,13 @@ def main() -> None:
         .concurrent_updates(True) \
         .build()
 
-    logger = logging.getLogger(__name__)
+    allowed = filters.Chat(chat_id=config.allowed_chat_id)
 
-    async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
-        logger.error("unhandled exception", exc_info=context.error)
-
-        if not isinstance(update, Update) or update.effective_chat is None:
-            return
-
-        if isinstance(context.error, TranscriptionError):
-            msg = "❌ не удалось распознать голос"
-        elif isinstance(context.error, MessageParseError):
-            msg = "❌ не удалось загрузить голосовое сообщение"
-        elif isinstance(context.error, TodoistError):
-            msg = "❌ не получилось добавить задачу"
-        else:
-            if update.effective_message:
-                text = update.effective_message.text or update.effective_message.caption or ""
-            else:
-                text = ""
-
-            if text:
-                suffix = f" Текст был: {text}."
-            else:
-                suffix = ""
-
-            msg = f"❌ не получилось.{suffix}"
-
-        await context.bot.send_message(update.effective_chat.id, msg)
-
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, processor.handle_text))
-    app.add_handler(MessageHandler(filters.VOICE, processor.handle_voice))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & allowed, processor.handle_text))
+    app.add_handler(MessageHandler(filters.VOICE & allowed, processor.handle_voice))
+    app.add_handler(MessageHandler(filters.ALL & ~allowed, reject))
     app.add_error_handler(error_handler)
+
     app.run_polling(drop_pending_updates=False, allowed_updates=Update.ALL_TYPES)
 
 
