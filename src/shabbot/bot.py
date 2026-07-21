@@ -3,7 +3,7 @@ import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 
-from shabbot.config import load_config
+from shabbot.config import Config, load_config
 from shabbot.message_parser import MessageParseError, TextMessageParser, VoiceMessageParser
 from shabbot.processor import Processor
 from shabbot.task_parser import SimpleTaskParser
@@ -12,38 +12,54 @@ from shabbot.transcribe import Transcriber, TranscriptionError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-logger = logging.getLogger(__name__)
 
-async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
-    logger.error("unhandled exception", exc_info=context.error)
+class Bot:
+    def __init__(self, config: Config, processor: Processor) -> None:
+        self._config = config
+        self._processor = processor
+        self._logger = logging.getLogger(__name__)
 
-    if not isinstance(update, Update) or update.effective_chat is None:
-        return
+    async def _error_handler(self, update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+        self._logger.error("unhandled exception", exc_info=context.error)
 
-    if isinstance(context.error, TranscriptionError):
-        msg = "❌ не удалось распознать голос"
-    elif isinstance(context.error, MessageParseError):
-        msg = "❌ не удалось загрузить голосовое сообщение"
-    elif isinstance(context.error, TodoistError):
-        msg = "❌ не получилось добавить задачу"
-    else:
+        if not isinstance(update, Update) or update.effective_chat is None:
+            return
+
+        if isinstance(context.error, TranscriptionError):
+            msg = "❌ не удалось распознать голос"
+        elif isinstance(context.error, MessageParseError):
+            msg = "❌ не удалось загрузить голосовое сообщение"
+        elif isinstance(context.error, TodoistError):
+            msg = "❌ не получилось добавить задачу"
+        else:
+            if update.effective_message:
+                text = update.effective_message.text or update.effective_message.caption or ""
+            else:
+                text = ""
+
+            suffix = f" Текст был: {text}." if text else ""
+            msg = f"❌ не получилось.{suffix}"
+
+        await context.bot.send_message(update.effective_chat.id, msg)
+
+    async def _reject(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         if update.effective_message:
-            text = update.effective_message.text or update.effective_message.caption or ""
-        else:
-            text = ""
+            await update.effective_message.reply_text("🚫")
 
-        if text:
-            suffix = f" Текст был: {text}."
-        else:
-            suffix = ""
+    def run(self) -> None:
+        allowed = filters.Chat(chat_id=self._config.allowed_chat_id)
 
-        msg = f"❌ не получилось.{suffix}"
+        app = ApplicationBuilder() \
+            .token(self._config.shabbot_token) \
+            .concurrent_updates(True) \
+            .build()
 
-    await context.bot.send_message(update.effective_chat.id, msg)
+        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & allowed, self._processor.handle_text))
+        app.add_handler(MessageHandler(filters.VOICE & allowed, self._processor.handle_voice))
+        app.add_handler(MessageHandler(filters.ALL & ~allowed, self._reject))
+        app.add_error_handler(self._error_handler)
 
-async def reject(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-    if update.effective_message:
-        await update.effective_message.reply_text("🚫")
+        app.run_polling(drop_pending_updates=False, allowed_updates=Update.ALL_TYPES)
 
 
 def main() -> None:
@@ -51,7 +67,7 @@ def main() -> None:
 
     transcriber = Transcriber(
         whisper_bin=config.whisper_bin,
-        whisper_model=config.whisper_model
+        whisper_model=config.whisper_model,
     )
 
     processor = Processor(
@@ -61,19 +77,7 @@ def main() -> None:
         todoist=TodoistClient(config.todoist_token),
     )
 
-    app = ApplicationBuilder() \
-        .token(config.shabbot_token) \
-        .concurrent_updates(True) \
-        .build()
-
-    allowed = filters.Chat(chat_id=config.allowed_chat_id)
-
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & allowed, processor.handle_text))
-    app.add_handler(MessageHandler(filters.VOICE & allowed, processor.handle_voice))
-    app.add_handler(MessageHandler(filters.ALL & ~allowed, reject))
-    app.add_error_handler(error_handler)
-
-    app.run_polling(drop_pending_updates=False, allowed_updates=Update.ALL_TYPES)
+    Bot(config, processor).run()
 
 
 if __name__ == '__main__':

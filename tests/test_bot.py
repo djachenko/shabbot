@@ -1,7 +1,11 @@
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
-from shabbot.bot import reject
+from shabbot.bot import Bot
+
+
+def _make_bot() -> Bot:
+    return Bot(config=MagicMock(), processor=MagicMock())
 
 
 class TestReject:
@@ -10,7 +14,7 @@ class TestReject:
         update = MagicMock()
         update.effective_message = message
 
-        asyncio.run(reject(update, MagicMock()))
+        asyncio.run(_make_bot()._reject(update, MagicMock()))
 
         message.reply_text.assert_called_once_with("🚫")
 
@@ -18,4 +22,4 @@ class TestReject:
         update = MagicMock()
         update.effective_message = None
 
-        asyncio.run(reject(update, MagicMock()))
+        asyncio.run(_make_bot()._reject(update, MagicMock()))
