@@ -2,6 +2,35 @@
 
 <!-- version list -->
 
+## v0.6.1 (2026-10-06)
+
+### Bug Fixes
+
+- Silence httpx request logging to keep bot token out of logs
+  ([`d6ec3d4`](https://github.com/djachenko/shabbot/commit/d6ec3d42175f70882fb5d8eb9c58b5cbd0805a86))
+
+### Build System
+
+- Pin ruff to 0.15.x
+  ([`b151d56`](https://github.com/djachenko/shabbot/commit/b151d563d2ebdcd49914a87e0f960895aa8de1ed))
+
+- Use cpu-only torch and host whisper cache in docker
+  ([`74e4909`](https://github.com/djachenko/shabbot/commit/74e4909be74ea5de9ba3a074f52984567f23fd96))
+
+### Refactoring
+
+- Extract Bot class from bot.py
+  ([`1bfc084`](https://github.com/djachenko/shabbot/commit/1bfc08495cd6f8a28bce364f300b5794f923dfaa))
+
+### Testing
+
+- Add tests for Bot._error_handler
+  ([`478070e`](https://github.com/djachenko/shabbot/commit/478070e237c832d4e15303cd6be925d3edd08e3e))
+
+- Add tests for Bot._error_handler
+  ([`076e075`](https://github.com/djachenko/shabbot/commit/076e075a806657b58f33d8e20665f91b26e3dbd5))
+
+
 ## v0.6.0 (2026-07-20)
 
 ### Features
