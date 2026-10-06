@@ -11,6 +11,7 @@ from shabbot.todoist import TodoistClient, TodoistError
 from shabbot.transcribe import Transcriber, TranscriptionError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 class Bot:
