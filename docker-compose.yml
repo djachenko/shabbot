@@ -5,8 +5,5 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     volumes:
-      - whisper-cache:/root/.cache/whisper
+      - ${HOME}/.cache/whisper:/root/.cache/whisper
     restart: unless-stopped
-
-volumes:
-  whisper-cache:
