@@ -22,14 +22,18 @@ def _make_context(error: BaseException) -> MagicMock:
     return context
 
 
-def _make_update(text: str | None = None, caption: str | None = None) -> MagicMock:
+def _make_update(text: str | None = None, caption: str | None = None, topic_id: int | None = None) -> MagicMock:
     update = MagicMock()
     update.__class__ = Update
     update.effective_chat = MagicMock()
     update.effective_chat.id = 42
-    update.effective_message = MagicMock()
+    update.effective_message = AsyncMock()
     update.effective_message.text = text
     update.effective_message.caption = caption
+    update.effective_message.is_topic_message = topic_id is not None
+    update.effective_message.message_thread_id = topic_id
+    update.effective_message.chat.id = 42
+    update.effective_message.chat.type = "supergroup"
     return update
 
 
@@ -38,14 +42,25 @@ def _make_update(text: str | None = None, caption: str | None = None) -> MagicMo
 # -------------------------------------------------------------------
 
 class TestReject:
-    def test_replies_with_ban_emoji(self) -> None:
-        message = AsyncMock()
-        update = MagicMock()
-        update.effective_message = message
+    def test_reply_explains_how_to_allow_chat(self) -> None:
+        update = _make_update()
 
         asyncio.run(_make_bot()._reject(update, MagicMock()))
 
-        message.reply_text.assert_called_once_with("🚫")
+        update.effective_message.reply_text.assert_called_once_with(
+            "🚫 Чат не в allowlist.\n"
+            "chat_id: 42\n"
+            "тип: supergroup\n"
+            "Добавь chat_id в ALLOWED_CHAT_IDS и перезапусти бота."
+        )
+
+    def test_reply_includes_thread_id_from_topic(self) -> None:
+        update = _make_update(topic_id=7)
+
+        asyncio.run(_make_bot()._reject(update, MagicMock()))
+
+        reply = update.effective_message.reply_text.call_args.args[0]
+        assert "thread_id: 7" in reply
 
     def test_no_reply_without_message(self) -> None:
         update = MagicMock()
@@ -90,7 +105,7 @@ class TestErrorHandlerKnownErrors:
 
         await _make_bot()._error_handler(update, context)
 
-        context.bot.send_message.assert_awaited_once_with(42, "❌ не удалось распознать голос")
+        context.bot.send_message.assert_awaited_once_with(42, "❌ не удалось распознать голос", message_thread_id=None)
 
     @pytest.mark.anyio
     async def test_message_parse_error(self) -> None:
@@ -99,7 +114,7 @@ class TestErrorHandlerKnownErrors:
 
         await _make_bot()._error_handler(update, context)
 
-        context.bot.send_message.assert_awaited_once_with(42, "❌ не удалось загрузить голосовое сообщение")
+        context.bot.send_message.assert_awaited_once_with(42, "❌ не удалось загрузить голосовое сообщение", message_thread_id=None)
 
     @pytest.mark.anyio
     async def test_todoist_error(self) -> None:
@@ -108,7 +123,16 @@ class TestErrorHandlerKnownErrors:
 
         await _make_bot()._error_handler(update, context)
 
-        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось добавить задачу")
+        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось добавить задачу", message_thread_id=None)
+
+    @pytest.mark.anyio
+    async def test_replies_to_same_topic(self) -> None:
+        update = _make_update(topic_id=7)
+        context = _make_context(TodoistError("api error"))
+
+        await _make_bot()._error_handler(update, context)
+
+        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось добавить задачу", message_thread_id=7)
 
 
 # -------------------------------------------------------------------
@@ -123,7 +147,7 @@ class TestErrorHandlerGenericError:
 
         await _make_bot()._error_handler(update, context)
 
-        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось. Текст был: купить молоко.")
+        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось. Текст был: купить молоко.", message_thread_id=None)
 
     @pytest.mark.anyio
     async def test_falls_back_to_caption_when_no_text(self) -> None:
@@ -132,7 +156,7 @@ class TestErrorHandlerGenericError:
 
         await _make_bot()._error_handler(update, context)
 
-        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось. Текст был: голосовая подпись.")
+        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось. Текст был: голосовая подпись.", message_thread_id=None)
 
     @pytest.mark.anyio
     async def test_text_takes_priority_over_caption(self) -> None:
@@ -141,7 +165,7 @@ class TestErrorHandlerGenericError:
 
         await _make_bot()._error_handler(update, context)
 
-        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось. Текст был: основной текст.")
+        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось. Текст был: основной текст.", message_thread_id=None)
 
     @pytest.mark.anyio
     async def test_generic_message_when_no_text_and_no_caption(self) -> None:
@@ -150,7 +174,7 @@ class TestErrorHandlerGenericError:
 
         await _make_bot()._error_handler(update, context)
 
-        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось.")
+        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось.", message_thread_id=None)
 
     @pytest.mark.anyio
     async def test_generic_message_when_no_effective_message(self) -> None:
@@ -160,7 +184,7 @@ class TestErrorHandlerGenericError:
 
         await _make_bot()._error_handler(update, context)
 
-        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось.")
+        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось.", message_thread_id=None)
 
 
 # -------------------------------------------------------------------
@@ -183,8 +207,8 @@ class TestMessageIsolation:
         await bot._error_handler(update1, context1)
         await bot._error_handler(update2, context2)
 
-        context1.bot.send_message.assert_awaited_once_with(42, "❌ не удалось распознать голос")
-        context2.bot.send_message.assert_awaited_once_with(42, "❌ не получилось. Текст был: купить молоко.")
+        context1.bot.send_message.assert_awaited_once_with(42, "❌ не удалось распознать голос", message_thread_id=None)
+        context2.bot.send_message.assert_awaited_once_with(42, "❌ не получилось. Текст был: купить молоко.", message_thread_id=None)
 
     @pytest.mark.anyio
     async def test_failed_message_does_not_affect_next(self) -> None:
@@ -201,7 +225,7 @@ class TestMessageIsolation:
         await bot._error_handler(update2, context2)
 
         context1.bot.send_message.assert_not_awaited()
-        context2.bot.send_message.assert_awaited_once_with(42, "❌ не получилось добавить задачу")
+        context2.bot.send_message.assert_awaited_once_with(42, "❌ не получилось добавить задачу", message_thread_id=None)
 
 
 # -------------------------------------------------------------------

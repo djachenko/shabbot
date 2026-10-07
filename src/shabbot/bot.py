@@ -1,6 +1,6 @@
 import logging
 
-from telegram import Update
+from telegram import Message, Update
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 
 from shabbot.config import Config, load_config
@@ -12,6 +12,13 @@ from shabbot.transcribe import Transcriber, TranscriptionError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logging.getLogger("httpx").setLevel(logging.WARNING)
+
+
+def _topic_id(message: Message | None) -> int | None:
+    if message is None or not message.is_topic_message:
+        return None
+
+    return message.message_thread_id
 
 
 class Bot:
@@ -41,11 +48,32 @@ class Bot:
             suffix = f" Текст был: {text}." if text else ""
             msg = f"❌ не получилось.{suffix}"
 
-        await context.bot.send_message(update.effective_chat.id, msg)
+        await context.bot.send_message(
+            update.effective_chat.id,
+            msg,
+            message_thread_id=_topic_id(update.effective_message),
+        )
 
     async def _reject(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        if update.effective_message:
-            await update.effective_message.reply_text("🚫")
+        message = update.effective_message
+
+        if message is None:
+            return
+
+        chat = message.chat
+        topic_id = _topic_id(message)
+
+        self._logger.warning("rejected chat_id=%s thread_id=%s type=%s", chat.id, topic_id, chat.type)
+
+        lines = ["🚫 Чат не в allowlist.", f"chat_id: {chat.id}"]
+
+        if topic_id is not None:
+            lines.append(f"thread_id: {topic_id}")
+
+        lines.append(f"тип: {chat.type}")
+        lines.append("Добавь chat_id в ALLOWED_CHAT_IDS и перезапусти бота.")
+
+        await message.reply_text("\n".join(lines))
 
     def run(self) -> None:
         allowed = filters.Chat(chat_id=self._config.allowed_chat_ids)
