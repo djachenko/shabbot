@@ -48,6 +48,7 @@ source ~/.config/shabbot/env && shabbot
 Переменные:
 - `SHABBOT_TOKEN` — Telegram bot token
 - `TODOIST_TOKEN` — Todoist API token
+- `ALLOWED_CHAT_IDS` — chat_id через запятую (личка, группы); бот отвечает chat_id на сообщение из чата не из списка
 - `WHISPER_MODEL` — модель (default: `large-v3-turbo`)
 - `WHISPER_BIN` — путь к whisper (default: `whisper`, только для локального запуска)
 

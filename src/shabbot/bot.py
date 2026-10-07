@@ -48,7 +48,7 @@ class Bot:
             await update.effective_message.reply_text("🚫")
 
     def run(self) -> None:
-        allowed = filters.Chat(chat_id=self._config.allowed_chat_id)
+        allowed = filters.Chat(chat_id=self._config.allowed_chat_ids)
 
         app = ApplicationBuilder() \
             .token(self._config.shabbot_token) \
