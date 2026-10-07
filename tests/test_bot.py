@@ -62,6 +62,22 @@ class TestReject:
         reply = update.effective_message.reply_text.call_args.args[0]
         assert "thread_id: 7" in reply
 
+    def test_reply_thread_outside_topic_is_not_shown(self) -> None:
+        update = _make_update()
+        update.effective_message.message_thread_id = 5
+
+        asyncio.run(_make_bot()._reject(update, MagicMock()))
+
+        reply = update.effective_message.reply_text.call_args.args[0]
+        assert "thread_id" not in reply
+
+    def test_logs_rejected_chat(self, caplog: pytest.LogCaptureFixture) -> None:
+        update = _make_update(topic_id=7)
+
+        asyncio.run(_make_bot()._reject(update, MagicMock()))
+
+        assert "rejected chat_id=42 thread_id=7 type=supergroup" in caplog.text
+
     def test_no_reply_without_message(self) -> None:
         update = MagicMock()
         update.effective_message = None
@@ -133,6 +149,16 @@ class TestErrorHandlerKnownErrors:
         await _make_bot()._error_handler(update, context)
 
         context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось добавить задачу", message_thread_id=7)
+
+    @pytest.mark.anyio
+    async def test_reply_thread_outside_topic_goes_to_chat(self) -> None:
+        update = _make_update()
+        update.effective_message.message_thread_id = 5
+        context = _make_context(TodoistError("api error"))
+
+        await _make_bot()._error_handler(update, context)
+
+        context.bot.send_message.assert_awaited_once_with(42, "❌ не получилось добавить задачу", message_thread_id=None)
 
 
 # -------------------------------------------------------------------
