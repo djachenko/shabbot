@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v0.7.0 (2026-10-19)
+
+### Features
+
+- Allow multiple chat ids in allowlist
+  ([`3e16559`](https://github.com/djachenko/shabbot/commit/3e165599636bb362eaeb68f1dbbf42851c0ea3f1))
+
+- Show chat details on reject and reply in the same topic
+  ([`f9b73ba`](https://github.com/djachenko/shabbot/commit/f9b73bafdd9d9b6cf7ef1f1de7dcc2c4a2dbe3c2))
+
+### Testing
+
+- Cover reply threads outside topics and rejected-chat log
+  ([`0a40aed`](https://github.com/djachenko/shabbot/commit/0a40aedc4390e9a7fe6a648a93531113c6a8a1f2))
+
+
 ## v0.6.1 (2026-10-06)
 
 ### Bug Fixes
