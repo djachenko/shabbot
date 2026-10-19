@@ -11,7 +11,7 @@ from shabbot.config import Config, DEFAULT_WHISPER_MODEL, load_config
 def env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SHABBOT_TOKEN", "tg-token")
     monkeypatch.setenv("TODOIST_TOKEN", "td-token")
-    monkeypatch.setenv("ALLOWED_CHAT_ID", "123456")
+    monkeypatch.setenv("ALLOWED_CHAT_IDS", "123456")
     monkeypatch.setenv("WHISPER_MODEL", "tiny")
     monkeypatch.setenv("WHISPER_BIN", "/usr/bin/whisper")
 
@@ -24,9 +24,18 @@ class TestLoadConfig:
 
         assert config.shabbot_token == "tg-token"
         assert config.todoist_token == "td-token"
-        assert config.allowed_chat_id == 123456
+        assert config.allowed_chat_ids == [123456]
         assert config.whisper_model == "tiny"
         assert config.whisper_bin == "/usr/bin/whisper"
+
+    def test_parses_chat_id_list(self, env_vars: None, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        monkeypatch.setenv("ALLOWED_CHAT_IDS", "123456, -100222")
+
+        with patch("shabbot.config.CONFIG_DIR", tmp_path), \
+             patch("shabbot.config.CONFIG_FILE", tmp_path / "env"):
+            config = load_config()
+
+        assert config.allowed_chat_ids == [123456, -100222]
 
     def test_default_whisper_bin(self, env_vars: None, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         monkeypatch.delenv("WHISPER_BIN", raising=False)
@@ -43,7 +52,7 @@ class TestConfigSave:
         config = Config(
             shabbot_token="tg-token",
             todoist_token="td-token",
-            allowed_chat_id=123456,
+            allowed_chat_ids=[123456, -100222],
             whisper_model="tiny",
         )
 
@@ -54,7 +63,7 @@ class TestConfigSave:
         content = (tmp_path / "env").read_text()
         assert "SHABBOT_TOKEN=tg-token" in content
         assert "TODOIST_TOKEN=td-token" in content
-        assert "ALLOWED_CHAT_ID=123456" in content
+        assert "ALLOWED_CHAT_IDS=123456,-100222" in content
         assert "WHISPER_MODEL=tiny" in content
 
     @pytest.mark.skipif(sys.platform == "win32", reason="chmod 600 is Unix-only")
@@ -62,7 +71,7 @@ class TestConfigSave:
         config = Config(
             shabbot_token="x",
             todoist_token="x",
-            allowed_chat_id=1,
+            allowed_chat_ids=[1],
             whisper_model="tiny",
         )
 
